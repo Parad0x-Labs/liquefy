@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# --- $NULL SOVEREIGN SDK CLI WRAPPER ---
+# Policy: Data Sovereignty / Path C (Public Recovery)
+set -euo pipefail
+
+IMAGE="nullaai/liquefy-decoder-public:latest"
+
+usage() {
+  cat <<EOF
+Usage:
+  ./liquefy version
+  ./liquefy verify <archive>
+  ./liquefy decompress <archive> <output>
+
+Notes:
+  - Uses the public decode-only appliance (no compression, no tuning).
+  - Runs offline: --network=none, read-only rootfs, dropped caps.
+EOF
+}
+
+cmd="${1:-}"
+if [[ -z "$cmd" ]]; then usage; exit 2; fi
+
+if ! command -v docker >/dev/null 2>&1; then
+  echo "ERROR: Docker is required. Please install Docker to run the hardened conduction environment." >&2
+  exit 2
+fi
+
+case "$cmd" in
+  version)
+    echo "[+] Ensuring latest hardened machine is available..."
+    docker pull "$IMAGE" >/dev/null
+    docker run --rm --network=none --read-only --cap-drop=ALL "$IMAGE" version
+    ;;
+  verify)
+    archive="${2:-}"
+    [[ -n "$archive" ]] || { usage; exit 2; }
+    echo "[+] Pulling decoder machine..."
+    docker pull "$IMAGE" >/dev/null
+    docker run --rm --network=none --read-only --cap-drop=ALL \
+      -v "$(pwd)":/data:rw \
+      "$IMAGE" verify "/data/$archive"
+    ;;
+  decompress)
+    archive="${2:-}"
+    output="${3:-}"
+    [[ -n "$archive" && -n "$output" ]] || { usage; exit 2; }
+    echo "[+] Pulling decoder machine..."
+    docker pull "$IMAGE" >/dev/null
+    docker run --rm --network=none --read-only --cap-drop=ALL \
+      -v "$(pwd)":/data:rw \
+      "$IMAGE" decompress "/data/$archive" -o "/data/$output"
+    ;;
+  *)
+    usage; exit 2
+    ;;
+esac

@@ -1,0 +1,26 @@
+# Parad0x Labs - Liquefy .gitignore
+
+# Internal Audits & Sensitive Docs
+INTERNAL_AUDIT/
+*.txt
+*.log
+MISSION_LOG_*
+INTERNAL_REVIEW_*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+
+# Docker / Build
+appliance-public/decoder_source.py
+dist/
+build/
+*.spec
+
+# OS
+.DS_Store
+Thumbs.db
+
