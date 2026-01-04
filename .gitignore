@@ -1,9 +1,9 @@
 # Parad0x Labs - Liquefy .gitignore
 
-# Internal Audits & Sensitive Docs
-INTERNAL_AUDIT/
-*.txt
-*.log
+# Internal Audits & Sensitive Docs (Scoped to prevent "audit smell")
+INTERNAL_AUDIT/**/*.txt
+INTERNAL_AUDIT/**/*.log
+REPORTS/INTERNAL_REVIEW_*
 MISSION_LOG_*
 INTERNAL_REVIEW_*
 
@@ -23,4 +23,3 @@ build/
 # OS
 .DS_Store
 Thumbs.db
-
