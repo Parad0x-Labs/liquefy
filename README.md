@@ -48,15 +48,36 @@ chmod +x ./liquefy
 
 ## 📂 Offline Decompression (Public, Decode-Only)
 
-Liquefy guarantees that **data is never hostage**. Anyone can decompress production archives locally using the public decode-only appliance.
+Liquefy guarantees that **your data is never hostage**. Anyone can **decompress and verify** Liquefy archives locally using the public **decode-only** appliance.
 
-The `./liquefy` wrapper automatically pulls and runs a **pinned decoder machine** published by Parad0x Labs.
+The `./liquefy` wrapper runs a **pinned decoder image** published by Parad0x Labs.
 
-**Notes:**
-- **Capabilities:** This public decoder supports **decompression + verification only**.
-- **Security:** Runs fully offline (`--network=none`) with a read-only root filesystem.
-- **Sealed:** Compression, orchestration, and engine tuning remain proprietary and are not shipped in public repos.
-- **Network Note:** If you cannot pull the public decoder image, your environment may be blocking Docker registry access.
+### Notes
+- **Capabilities:** Decompression + integrity verification only (no compression).
+- **Offline by default:** The decoder runs with `--network=none` and a read-only root filesystem. Your data never leaves the machine.
+- **Sealed encoder:** Compression, orchestration, and engine tuning are proprietary and are not shipped in public repos.
+- **First-run / restricted networks:** The wrapper may need **one-time registry access** to pull the pinned decoder image. If registry access is blocked, preload the image (airgap-friendly) using the steps below.
+
+### Airgapped / Restricted Network Quickstart
+
+> Replace `<DECODER_IMAGE:PINNED_TAG>` with the **exact** image reference used by `./liquefy`.
+
+**On a machine with registry access (staging/build box):**
+- Pull + export the pinned decoder image:
+  - `docker pull <DECODER_IMAGE:PINNED_TAG>`
+  - `docker save -o liquefy-decoder-image.tar <DECODER_IMAGE:PINNED_TAG>`
+
+Transfer `liquefy-decoder-image.tar` to the airgapped host (USB / secure artifact store).
+
+**On the airgapped host:**
+- Import the image locally:
+  - `docker load -i liquefy-decoder-image.tar`
+- Run as usual (still offline / `--network=none`):
+  - `./liquefy verify <archive>.null`
+  - `./liquefy decompress <archive>.null <output>`
+
+**Tip:** If your org uses an internal registry mirror, push the pinned image there and pull from the mirror instead of a public registry.
+
 
 ---
 
