@@ -39,13 +39,41 @@ flowchart LR
 
 ## The number that matters
 
-| Tool | Ratio on structured JSON | Notes |
-|------|--------------------------|-------|
-| **Liquefy Columnar Gun v1** | **61×** | columnar transpose + type-aware encoding + Zstd |
-| Zstd L19 | 41× | best-in-class general compressor |
-| gzip -9 | ~12× | baseline |
+| Tool | Ratio on structured JSON | Search latency | Notes |
+|------|--------------------------|----------------|-------|
+| **Liquefy Columnar Gun v1** | **61×** | **5.7 ms** | columnar transpose + type-aware encoding + Zstd |
+| Zstd L19 | 41× | 26.5 ms (full decompress) | best-in-class general compressor |
+| gzip -9 | ~12× | — | baseline |
 
-**+50% better than Zstd on structured data.** Not because Zstd is bad — because Liquefy knows the data is structured and transposes it before compressing.
+**+50% better compression than Zstd. 4.6× faster search. Both at once.**
+
+Not because Zstd is bad — because Liquefy knows the data is structured and transposes it before compressing. Zstd does the heavy lifting on already-separated columns. The result beats the general-purpose best on both axes.
+
+### Proof — run it yourself
+
+```bash
+python tools/benchmark.py   # reproduces these numbers in ~10 seconds
+```
+
+Or read the reports — all in the repo, all verified:
+
+| Document | What it proves |
+|----------|---------------|
+| [UNICORN_BENCHMARK.md](./REPORTS/UNICORN_BENCHMARK.md) | Full head-to-head vs Zstd L19 — ratio + search latency + methodology |
+| [ENTERPRISE_CERTIFICATION_V1.md](./REPORTS/ENTERPRISE_CERTIFICATION_V1.md) | Bit-perfect round-trip certification across all 23 codecs |
+| [ULTIMATE_TEST_LOGS.md](./REPORTS/ULTIMATE_TEST_LOGS.md) | Raw test output — every engine, every run |
+| [SEARCHABLE_GLACIER_PROOF.md](./REPORTS/SEARCHABLE_GLACIER_PROOF.md) | Column-skip search proof — O(k) vs O(n) |
+| [VERIFICATION_REPORT.md](./REPORTS/VERIFICATION_REPORT.md) | Independent verification of compression ratios |
+
+### Sample data + hashes
+
+`proof-pack/` ships a real nginx log + its compressed `.null` archive with SHA-256 hashes. Decompress it, hash the output, compare. The bytes match or the tool is wrong.
+
+```bash
+# verify the included sample yourself
+./liquefy decompress proof-pack/samples/compressed/sample_nginx.null restored.log
+sha256sum restored.log   # must match proof-pack/hashes.txt
+```
 
 ---
 
