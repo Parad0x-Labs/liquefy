@@ -11,6 +11,12 @@ This directory contains the authoritative verification reports for the Liquefy E
 2.  [**📋 Ultimate Test Logs**](./ULTIMATE_TEST_LOGS.md)
     Technical execution traces for specific enterprise datasets (Apache, K8s, Syslog) including SHA-256 hashes and bit-perfect proofs.
 
+3.  [**🦄 Unicorn Benchmark: Liquefy vs. Zstd**](./UNICORN_BENCHMARK.md)
+    Head-to-head benchmark of Liquefy Columnar (COL1) vs. Zstd Level 19 on 50,000-line JSON log dataset. **61x vs 41x ratio. 5.75x faster search.**
+
+4.  [**🔍 Searchable Glacier Proof**](./SEARCHABLE_GLACIER_PROOF.md)
+    Proof-of-concept validation of columnar search efficiency. Demonstrates **2.4%–65% bytes decoded** vs 100% for standard Zstd — 90% less CPU work per query.
+
 ## 🥇 The Golden-Rule Standard
 We guarantee:
 - **Bit-Perfect Identity:** Not a single byte is lost or modified.
