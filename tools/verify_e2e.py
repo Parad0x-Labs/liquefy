@@ -34,6 +34,7 @@ def sha256(data: bytes) -> str:
 
 
 def generate_logs(n=10_000) -> bytes:
+    """Generate compact JSON (no extra spaces) — matches engine output format."""
     lines = []
     for i in range(n):
         lines.append(json.dumps({
@@ -42,7 +43,7 @@ def generate_logs(n=10_000) -> bytes:
             "service": "api-gateway",
             "trace_id": f"trace-{i:08d}",
             "msg": f"handled request {i} in {i % 50}ms",
-        }))
+        }, separators=(",", ":")))
     return "\n".join(lines).encode()
 
 
