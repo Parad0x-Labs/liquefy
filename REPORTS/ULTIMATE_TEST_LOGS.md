@@ -11,14 +11,14 @@
 
 ### 🧪 Test Run: `apache_access.log`
 - **File Type Guess:** `text/log-apache`
-- **Original Bytes:** `27,955,200`
-- **Original SHA256:** `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`
+- **Original Bytes:** `11,210,509`
+- **Original SHA256:** `136fd8af6ad4970fd6efbf801502a1f48f0ca870d8eddea694e4cd6fb61123db`
 - **Original BLAKE3:** `4fe903a6fcbbf34f18a0fc7793719a960af88965...`
 - **Compression Engine:** `LPRM (Log-Prism) v15`
-- **Compressed Size:** `2,212,485`
-- **Restore Bytes:** `27,955,200` (Bit-Perfect)
+- **Compressed Size:** `884,994`
+- **Restore Bytes:** `11,210,509` (Bit-Perfect)
 - **Restore Hash Match:** ✅ PASSED
-- **Line Count:** `150,000` (Verified)
+- **Line Count:** `75,000` (Verified)
 - **Newline Mode:** `LF`
 - **Binary Diff (cmp):** Identical
 

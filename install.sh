@@ -11,8 +11,7 @@ if ! [ -x "$(command -v docker)" ]; then
 fi
 
 echo "[+] Pulling Hardened $NULL Appliance..."
-# Placeholder for the public image
-# docker pull parad0xlabs/liquefy-decoder-public:latest
+docker pull nullaai/liquefy-decoder-public
 
 echo "[+] Setting up 'liquefy' CLI command..."
 chmod +x ./liquefy
