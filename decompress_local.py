@@ -92,7 +92,7 @@ def main():
     print(f"Archive: {args.archive}")
 
     if args.verify_only:
-        hashes_file = os.path.join(os.path.dirname(args.archive), "proof-pack", "hashes.txt")
+        hashes_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "proof-pack", "hashes.txt")
         verify_archive(args.archive, hashes_file)
         # verify_archive exits; no fall-through
 

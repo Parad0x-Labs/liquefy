@@ -22,7 +22,5 @@ SOFTWARE.
 
 ---
 
-Note: This license covers the public SDK wrapper, documentation, reference scripts,
-and Dockerfile specifications contained in this repository. The Liquefy decoder
-binary (distributed as a Docker image) is proprietary software and is not covered
-by this license. See docs/licensing.md for decoder licensing details.
+This license covers all source code, documentation, scripts, and specifications
+in this repository, including the compression engine source in engines/.

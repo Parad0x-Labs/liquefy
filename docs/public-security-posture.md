@@ -11,10 +11,10 @@ All archives produced by the Liquefy Conduction Engine are sealed within a multi
 - **Mandatory Authenticity:** An HMAC-SHA256 signature is calculated over the entire packet and verified **before** any decryption operations are attempted.
 
 ## 2. Sealed Conduction (The Machine vs. Recipe)
-The SDK utilizes a "Sealed Machine" model to protect core intellectual property:
-- **Binary Encapsulation:** Decompression logic, column reassembly kernels, and orchestration heuristics are delivered as a compiled, stripped ELF binary.
-- **Internal Masking:** Core protocols and engine identifiers are managed within the sealed binary environment.
-- **No Source Disclosure:** The public repository contains zero source code for the 23 specialized conduction kernels.
+The SDK is fully open source. Engine source is MIT-licensed in `engines/`. A hardened Docker decoder is also provided for air-gapped offline recovery:
+- **Open Source Engines:** All 12 compression codecs are available in `engines/` (Python, MIT).
+- **Docker Decoder:** Hardened offline recovery path with `--network=none`, read-only rootfs, dropped caps.
+- **No Data Egress:** All operations run locally. Nothing is transmitted to Parad0x Labs.
 
 ## 3. Hardened Execution Sandbox
 The `./liquefy` wrapper enforces a strict security conduction environment:

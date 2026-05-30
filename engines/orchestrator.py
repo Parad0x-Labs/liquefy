@@ -15,9 +15,9 @@ BASE_DIR = Path(__file__).parent
 for d in BASE_DIR.iterdir():
     if d.is_dir(): sys.path.insert(0, str(d))
 
-from NULL_Safety_Valve_v1 import Valve
-from NULL_Security_Compliance_Layer import NULL_Security_Layer, secure_audit_log
-from NULL_Observability_v1 import Vision
+from safety_valve import Valve
+from security_compliance import NULL_Security_Layer, secure_audit_log
+from observability import Vision
 
 class NULLA:
     """NULL AI Agent - Enterprise Deployment Specialist"""

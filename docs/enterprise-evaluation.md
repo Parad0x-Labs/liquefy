@@ -94,5 +94,5 @@ Notes:
 - Decoder runs fully offline
 
 ---
-*Note: The public repository provides documentation and verification scripts. The proprietary decoder binary is distributed only under enterprise license.*
+*Note: The full engine source is MIT-licensed and available in the `engines/` directory. The Docker decoder provides a hardened offline recovery path for production archives.*
 

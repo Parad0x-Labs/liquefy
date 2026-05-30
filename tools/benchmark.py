@@ -7,17 +7,15 @@ import json
 import statistics
 from pathlib import Path
 
-# Add research/unicorn_engines/json_codec to path for UNICORN TESTING
-BASE_DIR = Path(__file__).parent.parent.resolve()
-print(f"DEBUG: BASE_DIR={BASE_DIR}")
-sys.path.append(str(BASE_DIR))
-sys.path.append(str(BASE_DIR / "research" / "unicorn_engines" / "json_codec"))
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT / "engines" / "json_codec"))
+sys.path.insert(0, str(REPO_ROOT / "engines"))
 
 try:
     from NULL_Json_Columnar_Gun_v1 import NULL_Json_Columnar_Gun_v1 as LiquefyColumnarGunV1
-    print("SUCCESS: Loaded UNICORN Engine from research/")
 except ImportError as e:
-    print(f"Error: Could not import Unicorn Engine: {e}")
+    print(f"Error: Could not import engine: {e}")
+    print("Run: pip install -r requirements.txt")
     sys.exit(1)
 
 def generate_sample_logs(lines=10000):
@@ -82,7 +80,7 @@ def search_liquefy_optimized(data_compressed, query_str):
     return time.perf_counter() - start, len(matching_indices)
 
 def main():
-    print("=== LIQUEFY UNICORN BENCHMARK v1 ===")
+    print("=== Liquefy vs Zstd: Columnar Compression Benchmark ===")
     print("Dataset: 50,000 JSON log lines (~10MB raw)")
     raw_data = generate_sample_logs(50000)
     raw_size = len(raw_data) / (1024*1024)
