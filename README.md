@@ -1,5 +1,6 @@
 # 🧪 Liquefy: Entropy-Native Log Analytics
 
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 ![Conduction: 23 Engines](https://img.shields.io/badge/Conduction-23_Engines-cyan?style=flat-square)
 ![Status: Public SDK](https://img.shields.io/badge/Status-Public_SDK-00ff41?style=flat-square)
 ![Verification: Bit--Perfect](https://img.shields.io/badge/Verification-Bit--Perfect-white?style=flat-square)
