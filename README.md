@@ -2,6 +2,8 @@
 
 **Columnar compression that beats Zstd on structured data. Built-in search. Built-in encryption. MIT.**
 
+[![PyPI](https://img.shields.io/pypi/v/liquefy?style=flat-square&color=00ff41)](https://pypi.org/project/liquefy/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/liquefy?style=flat-square&color=cyan)](https://pypi.org/project/liquefy/)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 ![Codecs: 23](https://img.shields.io/badge/Codecs-23-cyan?style=flat-square)
 ![vs Zstd: +50%](https://img.shields.io/badge/vs_Zstd-+50%25_on_structured_data-00ff41?style=flat-square)
@@ -143,14 +145,14 @@ The anchor program is live on Solana mainnet. The TypeScript port is at [`packag
 
 ## Install
 
-**One command:**
+**pip (recommended):**
 ```bash
-git clone https://github.com/Parad0x-Labs/liquefy.git && cd liquefy && bash install.sh
+pip install liquefy
 ```
 
-**Or pip only:**
+**From source:**
 ```bash
-pip install git+https://github.com/Parad0x-Labs/liquefy.git
+git clone https://github.com/Parad0x-Labs/liquefy.git && cd liquefy && bash install.sh
 ```
 
 ---
