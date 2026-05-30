@@ -1,0 +1,2 @@
+5380290fb0a6967b0a4d66e5b201bf0d76492bed33fff6b0fe0a3966c37a1ce4  samples/raw/sample_nginx.log
+d3f754f3d64a8c7071aacc263cdf3519d3ec28ebbb0a6ebe2217e2cab278aad8  samples/compressed/sample_nginx.null

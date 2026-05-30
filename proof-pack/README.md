@@ -10,13 +10,13 @@ This pack contains reference samples and cryptographic proofs to validate the Li
 
 ## Verification Command
 ```bash
-./liquefy verify proof-pack/samples/compressed/sample_syslog.null
+./liquefy verify proof-pack/samples/compressed/sample_nginx.null
 ```
 
 ## Decompression Proof
 ```bash
-./liquefy decompress proof-pack/samples/compressed/sample_syslog.null restored.log
-diff proof-pack/samples/raw/sample_syslog.log restored.log
+./liquefy decompress proof-pack/samples/compressed/sample_nginx.null restored.log
+diff proof-pack/samples/raw/sample_nginx.log restored.log
 ```
 
 ---
