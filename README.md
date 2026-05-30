@@ -9,6 +9,34 @@
 
 ---
 
+## What happens to 1,000,000 agent payments
+
+```mermaid
+flowchart LR
+    A([🤖 1,000,000\nreceipts / day]) --> B[Net bilateral flows]
+    B --> C([📉 ~4,950\nnet settlements])
+    C --> D[Columnar Gun v1\n62× compression]
+    D --> E([📦 ~2.6 MB\ncompressed])
+    E --> F[AES-256-GCM\nencryption]
+    F --> G([🔒 private\nbatch])
+    G --> H[receipt_anchor\nSolana mainnet]
+    H --> I([⛓️ 1 tx\non-chain])
+
+    style A fill:#1a1a2e,color:#e0e0ff,stroke:#444
+    style C fill:#0d2137,color:#7ecfff,stroke:#2a6496
+    style E fill:#0d2137,color:#7ecfff,stroke:#2a6496
+    style G fill:#1a0d37,color:#c87eff,stroke:#6a2a96
+    style I fill:#0d3722,color:#7effb2,stroke:#2a9657
+    style B fill:#111,color:#aaa,stroke:#333
+    style D fill:#111,color:#aaa,stroke:#333
+    style F fill:#111,color:#aaa,stroke:#333
+    style H fill:#111,color:#aaa,stroke:#333
+```
+
+> 1 million receipts. 1 on-chain transaction. Only the parties see the amounts.
+
+---
+
 ## The number that matters
 
 | Tool | Ratio on structured JSON | Notes |
