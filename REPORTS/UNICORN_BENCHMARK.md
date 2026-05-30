@@ -34,7 +34,7 @@ We solved the "Metadata Leakage" problem without the massive overhead of Homomor
 *   **The Value:** This masks the true data boundaries (preventing fingerprinting attacks) while still allowing the engine to skip 99% of non-matching blocks. It is **Secure Enough for Compliance** but **Fast Enough for Real-Time Search**.
 
 ### C. The "Clean Room" Architecture
-We isolated these engines in a `research/unicorn_engines` environment to ensure stability.
+We isolated these engines in a clean-room environment to ensure stability. The source is now in `engines/` (MIT).
 *   **The Safety Valve:** We confirmed that "Dirty Data" (random UUIDs) kills performance.
 *   **The Solution:** Our upcoming "Hyper-Orchestrator" will automatically route high-entropy streams to raw Zstd, ensuring the system never chokes.
 

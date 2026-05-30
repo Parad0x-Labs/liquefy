@@ -52,7 +52,7 @@ sha256sum original_source.log restored.log
 
 ## Security & Privacy Statement
 
-- **No Source Disclosure:** The production decoder is a hardened binary.
+- **Open Source Engines:** Full engine source is MIT-licensed in `engines/`. The Docker decoder is an optional hardened packaging path.
 - **No Data Leakage:** The appliance is designed to run with `--network=none`.
 - **Read-Only:** The container root filesystem is read-only; it only writes to your mounted data volume.
 - **Least Privilege:** The appliance runs as a non-root user with all capabilities dropped.

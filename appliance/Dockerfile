@@ -11,7 +11,7 @@ LABEL description="Sealed Blackbox Decoder for Liquefy Archives"
 WORKDIR /app
 
 # The liquefy-decoder binary must be present in the build context.
-# It is not included in the public repository to protect proprietary IP.
+# Build it from the open-source engines: cp engines/orchestrator.py decoder_source.py
 COPY --chown=nonroot:nonroot liquefy-decoder /app/liquefy-decoder
 COPY --chown=nonroot:nonroot entrypoint.sh /app/entrypoint.sh
 
