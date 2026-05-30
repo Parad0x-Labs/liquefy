@@ -39,15 +39,18 @@ flowchart LR
 
 ## The number that matters
 
-| Tool | Ratio on structured JSON | Search latency | Notes |
-|------|--------------------------|----------------|-------|
-| **Liquefy Columnar Gun v1** | **61×** | **5.7 ms** | columnar transpose + type-aware encoding + Zstd |
-| Zstd L19 | 41× | 26.5 ms (full decompress) | best-in-class general compressor |
-| gzip -9 | ~12× | — | baseline |
+| Tool | Compression ratio | Search latency | Notes |
+|------|-------------------|----------------|-------|
+| **Liquefy Columnar Gun v1** | **33–61×** | **4–6 ms** | columnar transpose + type-aware encoding + Zstd |
+| Zstd L19 | 5–43× | 26–245 ms (full decompress required) | best-in-class general compressor |
+| gzip -9 | ~5–12× | — | baseline |
 
-**+50% better compression than Zstd. 4.6× faster search. Both at once.**
+**Two wins, not one.**
 
-Not because Zstd is bad — because Liquefy knows the data is structured and transposes it before compressing. Zstd does the heavy lifting on already-separated columns. The result beats the general-purpose best on both axes.
+- **Compression:** 1.4–6× better ratio than Zstd depending on data repetitiveness. The more structured and repetitive your data (agent logs, payment receipts, API traces), the bigger the gap.
+- **Search:** 5–61× faster than Zstd — because Liquefy decompresses only the queried column, not the entire blob. Zstd has no choice but to decompress everything.
+
+Both numbers are real. Run `python tools/benchmark.py` on your own data — ratio depends on how repetitive your fields are, search speed advantage is consistent.
 
 ### Proof — run it yourself
 
