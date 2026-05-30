@@ -22,3 +22,12 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Compiled C extensions
+*.so
+*.dll

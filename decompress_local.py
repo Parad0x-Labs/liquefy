@@ -2,10 +2,11 @@
 """
 Liquefy Local Decompressor (Public Reference Path)
 =================================================
-This script provides a public reference implementation for local verification.
-It is intended for evaluation purposes and quick integrity checks.
+Provides SHA-256 integrity verification against proof-pack/hashes.txt,
+and directs users to the appropriate engine or sealed decoder for actual
+decompression.
 
-For enterprise-grade, hardened restoration, please use the sealed decoder appliance.
+For enterprise-grade, hardened restoration, use the sealed decoder appliance.
 Visit: https://github.com/Parad0x-Labs/liquefy/blob/master/docs/enterprise-evaluation.md
 """
 
@@ -14,6 +15,7 @@ import sys
 import os
 import hashlib
 
+
 def calculate_sha256(filepath):
     sha256_hash = hashlib.sha256()
     with open(filepath, "rb") as f:
@@ -21,11 +23,64 @@ def calculate_sha256(filepath):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
 
+
+def load_hashes(hashes_file):
+    """Parse proof-pack/hashes.txt into a dict of {path: hash}."""
+    entries = {}
+    with open(hashes_file, "r") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split(None, 1)
+            if len(parts) == 2:
+                digest, path = parts
+                entries[path] = digest
+    return entries
+
+
+def verify_archive(archive_path, hashes_file):
+    if not os.path.exists(hashes_file):
+        print(f"Error: hashes file not found: {hashes_file}")
+        sys.exit(1)
+
+    actual_hash = calculate_sha256(archive_path)
+
+    try:
+        hashes = load_hashes(hashes_file)
+    except Exception as e:
+        print(f"Error reading hashes file: {e}")
+        sys.exit(1)
+
+    # Match by filename or full path stored in hashes.txt
+    archive_name = os.path.basename(archive_path)
+    expected_hash = None
+    for path, digest in hashes.items():
+        if path == archive_path or os.path.basename(path) == archive_name:
+            expected_hash = digest
+            break
+
+    print(f"Archive : {archive_path}")
+    print(f"SHA-256 : {actual_hash}")
+
+    if expected_hash is None:
+        print(f"FAIL  - no entry found for '{archive_name}' in {hashes_file}")
+        sys.exit(1)
+
+    if actual_hash == expected_hash:
+        print(f"PASS  - hash matches proof-pack record")
+        sys.exit(0)
+    else:
+        print(f"FAIL  - expected {expected_hash}")
+        sys.exit(1)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Liquefy Local Reference Decompressor")
     parser.add_argument("archive", help="Path to the .liq / .null archive")
     parser.add_argument("-o", "--output", help="Output path for restored data")
-    parser.add_argument("--verify-only", action="store_true", help="Only verify integrity hash")
+    parser.add_argument("--verify-only", action="store_true",
+                        help="Only verify SHA-256 integrity against proof-pack/hashes.txt")
 
     args = parser.parse_args()
 
@@ -33,32 +88,24 @@ def main():
         print(f"Error: Archive not found: {args.archive}")
         sys.exit(1)
 
-    print(f"--- Liquefy Local Reference Tool ---")
+    print("--- Liquefy Local Reference Tool ---")
     print(f"Archive: {args.archive}")
 
-    # In a real scenario, this script would call a local reference engine 
-    # like the ones in the /engines/ directory.
-    
     if args.verify_only:
-        print("Performing integrity check...")
-        # Mock verification logic
-        print("Result: [VERIFIED]")
-        sys.exit(0)
+        hashes_file = os.path.join(os.path.dirname(args.archive), "proof-pack", "hashes.txt")
+        verify_archive(args.archive, hashes_file)
+        # verify_archive exits; no fall-through
 
-    if not args.output:
-        print("Error: Output path required for decompression. Use -o <path>")
-        sys.exit(1)
+    # Decompression path — no sealed engine bundled in this public reference script
+    print()
+    print("The Python engines are in engines/ — use them directly for decompression.")
+    print("Example:")
+    print("  python engines/json_codec/NULL_Json_Columnar_Gun_v1.py")
+    print()
+    print("For bit-perfect, enterprise-grade restoration use the sealed decoder appliance:")
+    print("  docker run --rm -v \"$(pwd)\":/data parad0xlabs/liquefy-decoder:latest /data/<archive>")
+    sys.exit(0)
 
-    print(f"Restoring to: {args.output}...")
-    
-    # This is where the engine selection and restoration logic would go.
-    # For the public repo, we point users to the engines/ folder for examples.
-    print("\nNOTE: This is a reference script. To perform a bit-perfect restore,")
-    print("ensure you have the corresponding engine implementation from the /engines/ folder.")
-    print("For enterprise-grade restoration, use the sealed decoder binary.")
-    
-    print("\n[SUCCESS] Restoration complete (Reference path).")
 
 if __name__ == "__main__":
     main()
-

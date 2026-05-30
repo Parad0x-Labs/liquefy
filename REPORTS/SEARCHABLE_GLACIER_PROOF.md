@@ -1,4 +1,4 @@
-# 🦄 LIQUEFY UNICORN: THE "SEARCHABLE GLACIER" PROOF
+# Liquefy: Searchable Archive Proof
 **Date:** Jan 12, 2026
 **Status:** VALIDATED & DEPLOYED
 
@@ -54,4 +54,4 @@ The Rust implementation (`liquefy-core`) was successfully compiled and tested on
 *   **Cost:** We are slightly larger than Zstd L19, but **massively** cheaper than Splunk/Elastic.
 
 ---
-*Verified by Research Division*
+© 2026 Parad0x Labs

@@ -1,5 +1,5 @@
 ================================================================================
-$NULL SOVEREIGN SDK - CORPORATE TECHNICAL SPECIFICATION [v3.5-STABLE]
+$NULL SOVEREIGN SDK - CORPORATE TECHNICAL SPECIFICATION [v1.0]
 ================================================================================
 MISSION: Absolute Data Sovereignty + Maximum IP Protection
 ENTITY: Parad0x Labs
@@ -40,17 +40,9 @@ STATUS: Production Verified / Enterprise Stable
     - Features: Semantic reassembly of shredded columnar fragments and 
       recursive unflattening of complex nested structures (JSON/K8s).
 
---- [ 3. WHAT IS NOT PUBLIC ] ---
+--- [ 3. OPEN SOURCE ] ---
 
-3.1 ENCODER DECISION KERNELS
-    - The "Shredding" logic: How raw data is parsed and optimized.
-    - Kernel Selection: Autonomous heuristics for engine picking.
-
-3.2 ORCHESTRATOR INTELLIGENCE
-    - The autonomous management of fleet resources and conduction priorities.
-
-3.3 ADVANCED SEARCH EXECUTION
-    - Bitwise conduction logic for high-speed queries on compressed blobs.
+The full engine source (compression kernels, orchestrator, codecs) is MIT licensed and available in the engines/ directory.
 
 ================================================================================
 AUDIT COMPLETE. STATUS: ENTERPRISE READY / SEALED / BIT-PERFECT.

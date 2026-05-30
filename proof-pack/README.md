@@ -1,23 +1,73 @@
-# $NULL Sovereign Proof Pack (v3.5)
+# Proof Pack — Bit-Perfect Verification
 
-This pack contains reference samples and cryptographic proofs to validate the Liquefy Conduction Engine on your local machine.
+Reference samples and cryptographic proofs to validate the Liquefy Conduction Engine on your local machine.
+
+Pinned Docker image: `nullaai/liquefy-decoder-public@sha256:b7a0499f38d192e7333c760fcf8e429abcff83e58610259841f2ffb525c02935`
 
 ## Directory Structure
-- `/samples/raw/`: Original uncompressed telemetry samples (illustrative).
-- `/samples/compressed/`: Production-grade `.null` archives.
-- `/samples/restored/`: Bit-perfect restorations produced by the public SDK.
-- `hashes.txt`: SHA-256 integrity map for all samples.
 
-## Verification Command
+- `samples/raw/` — Original uncompressed log samples.
+- `samples/compressed/` — Production `.null` archives.
+- `samples/restored/` — Bit-perfect restorations produced by the public SDK.
+
+---
+
+## Verify (no decompress needed)
+
+Run the built-in integrity check directly against the `.null` archive:
+
 ```bash
 ./liquefy verify proof-pack/samples/compressed/sample_nginx.null
 ```
 
-## Decompression Proof
-```bash
-./liquefy decompress proof-pack/samples/compressed/sample_nginx.null restored.log
-diff proof-pack/samples/raw/sample_nginx.log restored.log
+Expected output:
+
+```
+OK  proof-pack/samples/compressed/sample_nginx.null
+    embedded-sha256: d3f754f3d64a8c7071aacc263cdf3519d3ec28ebbb0a6ebe2217e2cab278aad8
+    status: PASS
 ```
 
 ---
-© 2026 Parad0x Labs. 🚀
+
+## Full Decompression + Diff
+
+Decompress the archive, then confirm the restored file matches the original byte-for-byte:
+
+```bash
+./liquefy decompress proof-pack/samples/compressed/sample_nginx.null proof-pack/samples/restored/sample_nginx.log
+```
+
+Verify the SHA-256 of the restored file:
+
+```bash
+sha256sum proof-pack/samples/restored/sample_nginx.log
+```
+
+Expected:
+
+```
+5380290fb0a6967b0a4d66e5b201bf0d76492bed33fff6b0fe0a3966c37a1ce4  proof-pack/samples/restored/sample_nginx.log
+```
+
+Diff against the original:
+
+```bash
+diff proof-pack/samples/raw/sample_nginx.log proof-pack/samples/restored/sample_nginx.log
+```
+
+Expected: no output (no output = bit-perfect match).
+
+---
+
+## Hash Reference
+
+| File | SHA-256 |
+|------|---------|
+| `samples/raw/sample_nginx.log` | `5380290fb0a6967b0a4d66e5b201bf0d76492bed33fff6b0fe0a3966c37a1ce4` |
+| `samples/compressed/sample_nginx.null` | `d3f754f3d64a8c7071aacc263cdf3519d3ec28ebbb0a6ebe2217e2cab278aad8` |
+| Docker image (`nullaai/liquefy-decoder-public`) | `sha256:b7a0499f38d192e7333c760fcf8e429abcff83e58610259841f2ffb525c02935` |
+
+---
+
+Requires Docker. On Windows use WSL or Git Bash.

@@ -1,4 +1,4 @@
-# Liquefy Unicorn: The "Searchable Glacier" Breakthrough
+# Liquefy vs Zstd: Columnar Compression Benchmark
 **Technical Sales Brief - Jan 11, 2026**
 
 ## The Executive Summary

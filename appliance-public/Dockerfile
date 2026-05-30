@@ -1,10 +1,14 @@
-# STAGE 1: The Build Vault
+# STAGE 1: Build
 FROM python:3.9-slim AS builder
 
 RUN apt-get update && apt-get install -y binutils && rm -rf /var/lib/apt/lists/*
 RUN pip install pyinstaller zstandard xxhash cryptography
 
 WORKDIR /build
+# decoder_source.py is the encoder/decoder source.
+# For the OSS Python engines, see the engines/ directory in this repo.
+# To build this Docker appliance, copy your chosen engine as decoder_source.py
+# Example: cp engines/json_codec/NULL_Json_Columnar_Gun_v1.py decoder_source.py
 COPY decoder_source.py .
 
 # Compile Python into a single, stripped binary

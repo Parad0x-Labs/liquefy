@@ -1,69 +1,78 @@
-# PARAD0X LABS — LIQUEFY REPOSITORY MASTER REPORT [v3.7]
-**Project:** $NULL Sovereign SDK / Liquefy Conduction Engine
-**Status:** GOLD MASTER / 100% BIT-PERFECT VERIFIED
-**Classification:** ENTERPRISE TECHNICAL OVERVIEW
+# Parad0x Labs — Liquefy: Technical Overview
+
+**Project:** Liquefy — Open Source Log Compression and Search Engine
+**Status:** Open Source / MIT
+**Version:** Python OSS v1.0
 
 ---
 
-## 🎯 1. Mission Architecture
-Liquefy is a conduction-native log storage and real-time search platform. This repository provides the **Public Decode-Only Path**, ensuring that data is never hostage while protecting Parad0x Labs' core intellectual property.
+## 1. What It Is
 
-### **The "Machine vs. Recipe" Model**
-- **The Recipe (Secret):** The 23 specialized compression kernels, orchestrator heuristics, and master secrets. These exist only in our internal vault and as sealed binary logic.
-- **The Machine (Public):** A hardened, binary Docker appliance that allows customers to execute the logic without seeing the code.
+Liquefy is an open-source (MIT) log compression and search engine. It applies format-specific codecs to compress structured logs significantly better than general-purpose compressors like zstd, while enabling fast columnar search without full decompression.
 
 ---
 
-## 🚀 2. Delivery Model (How It Reaches the Customer)
-We deliver a **Zero-Network, Air-Gapped SDK** that operates via a single command.
+## 2. Architecture
 
-### **2.1 The Conductor (`./liquefy`)**
-The entry point is a hardened Bash wrapper that manages the lifecycle of the decoding process:
-1. **Auto-Sync:** Detects Docker and pulls the pinned, signed machine image (`nullaai/liquefy-decoder-public`).
-2. **Hardened Sandbox:** It executes the machine in a zero-trust envelope:
-    - `--network=none`: Absolute air-gap (zero data egress).
-    - `--read-only`: Immutable filesystem (prevents tampering).
-    - `--cap-drop=ALL`: Drops all Linux kernel capabilities.
-    - `--user nulla`: Runs as a restricted, non-root system user.
+### Hyper-Orchestrator
 
-### **2.2 High-Fidelity Proof (`/proof-pack`)**
-We provide real production samples so auditors can verify the **"Bit-Perfect Identity Law"**:
-- **Ingest Fingerprint:** Original hash of the log.
-- **Restoration Fingerprint:** Final hash after public decompression.
-- **Verification:** Guaranteed to be byte-for-byte identical.
+An auto-routing layer inspects incoming log streams, detects format, and selects the appropriate codec. No manual configuration is required for supported formats.
 
----
+### 12 Format Codecs
 
-## 🛡️ 3. IP Protection Strategy (How We Hide the "Recipe")
-The repository is engineered to be a "Reverse-Engineering Dead End."
+Each codec is tuned to the schema and field distribution of a specific log format:
 
-### **3.1 Binary Encapsulation**
-The restoration kernels (internal, proprietary identifiers) are written in Python but are **never delivered as source code**. We use a multi-stage forge to compile the logic into a **stripped ELF binary** via PyInstaller. All source code (`decoder_source.py`) is permanently nuked from the Git history.
+| Codec | Target Format |
+|---|---|
+| JSON | Generic structured JSON logs |
+| Nginx | Nginx access and error logs |
+| Apache | Apache Combined/Common log format |
+| Syslog | RFC 3164 / RFC 5424 syslog |
+| K8s | Kubernetes pod and event logs |
+| SQL | Database query and audit logs |
+| AWS CloudTrail | AWS API audit events |
+| VPC Flow | AWS VPC Flow Logs |
+| Netflow | Netflow v5/v9/IPFIX records |
+| VMware | ESXi and vCenter logs |
+| GitHub SCM | GitHub webhook and audit logs |
+| Windows EVTX | Windows Event Log (EVTX) |
 
-### **3.2 Protocol Masking (LSEC & SAFE)**
-The decoder handles our proprietary multi-layered protocols internally:
-- **LSEC (Fortress):** An identity-aware envelope that uses **AES-256-GCM** and **PBKDF2-HMAC-SHA256**. Key material is managed internally within the sealed binary and is never exposed to the host system.
-- **SAFE (Valve):** A conduction container that routes data to the correct kernel based on internal routing markers while bypassing proprietary indexing structures.
+### Codec Internals
+
+Each codec applies format-aware preprocessing: field extraction, dictionary encoding, delta encoding for timestamps and numeric sequences, and run-length encoding for repeated categorical values. This structural encoding stage feeds a final entropy compression pass. The combination is what drives ratio gains over generic compressors.
 
 ---
 
-## 🛠️ 4. The 23-Engine Fleet (Omni-Restoration Core)
-The v3.7 machine supports the full Parad0x Labs conduction fleet:
-- **Hyper-Columnar (JSON/K8s):** Recursive unflattening of nested structures.
-- **Semantic Reassembly (Apache/Nginx/SQL):** Re-joining shredded columnar fragments with static templates.
-- **Quantum Iteration (Syslog/Tailed):** Scans the stream for concatenated frames to support appended logs.
-- **SmartColumn Modes:** Automated restoration of Delta (ZigZag), RLE, and Dictionary-mapped data.
+## 3. Key Results
+
+- **Compression ratio:** 50%+ better than zstd level 19 on structured JSON logs.
+- **Columnar search:** Decodes only 2-65% of bytes depending on query selectivity, versus 100% for zstd. This enables fast field-level search on compressed archives.
+- **Throughput:** Compression and decompression speeds comparable to zstd at equivalent ratio targets.
 
 ---
 
-## ⚖️ 5. Compliance & Auditability
-The SDK is designed for the world's most regulated environments:
-- **SOC 2 / FedRAMP-aligned:** Architecture designed to support AEAD-based privacy and tenant isolation controls.
-- **GDPR:** Local, offline execution ensures no PII ever leaves the customer's jurisdiction.
-- **Audit-Ready:** Stable CLI contracts and machine-readable JSON output for automated security logs.
+## 4. Docker Decoder Path
 
-**Note:** Residual risk is limited to standard third-party runtime dependencies and is consistent with industry norms for sealed binary appliances.
+A hardened offline recovery image is provided separately from the OSS Python engines. It packages a standalone decoder that reconstructs archives without requiring a full Python environment. The container runs with:
+
+- `--network=none`: No data egress.
+- `--read-only`: Immutable filesystem.
+- `--cap-drop=ALL`: Minimal Linux capabilities.
+- `--user`: Non-root restricted user.
+
+Intended for air-gapped compliance environments and disaster recovery scenarios.
 
 ---
-**Parad0x Labs — Absolute Data Sovereignty.** 🛡️🚀🎖️
 
+## 5. Compliance
+
+- All processing runs locally. No data leaves the machine.
+- No telemetry, no cloud calls.
+- Suitable for GDPR-regulated data and air-gapped networks.
+- Stable CLI contracts and machine-readable JSON output support automated audit logging.
+
+---
+
+## 6. License
+
+MIT. Full source available in the Parad0x Labs repository.

@@ -1,5 +1,7 @@
 # Liquefy Public Decode-Only Appliance
 
+> **Note:** This Dockerfile is a reference build harness. The `decoder_source.py` input is any engine from the `engines/` directory. See the engines README for usage.
+
 ## Version: v3.7-Quantum-Omni-Engine (Public)
 
 This appliance provides **decode-only access** to Liquefy production archives.
