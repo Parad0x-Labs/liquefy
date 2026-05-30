@@ -1,7 +1,7 @@
 # Search CLI Contract (Public)
 
 ## Overview
-This document defines the stable interface for searching `.null` archives via the $NULL Sovereign SDK and sealed decoder appliances.
+This document defines the stable interface for searching `.null` archives via the $NULL Sovereign SDK.
 
 ## Commands
 ```bash

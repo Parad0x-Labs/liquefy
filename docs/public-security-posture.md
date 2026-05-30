@@ -2,15 +2,15 @@
 **Parad0x Labs**
 
 ## Overview
-The $NULL Sovereign SDK is engineered with a **Security-First / Identity-First** architecture. It is designed to provide 100% bit-perfect data recovery while maintaining absolute isolation and intellectual property protection.
+The $NULL Sovereign SDK is engineered with a **Security-First / Identity-First** architecture. It is designed to provide 100% bit-perfect data recovery with full local isolation — engine source is MIT-licensed in `engines/`.
 
 ## 1. Cryptographic Envelope (The Fortress)
-All archives produced by the Liquefy Conduction Engine are sealed within a multi-layered cryptographic envelope.
+All archives produced by the Liquefy engine are wrapped in a multi-layered cryptographic envelope.
 - **Authenticated Encryption:** Uses industry-standard **AES-256-GCM** (Authenticated Encryption with Associated Data). This ensures both the privacy of the compressed data and the integrity of the associated audit metadata.
 - **Tenant Isolation:** Every vault is keyed uniquely to a tenant identity. Key derivation uses **PBKDF2-HMAC-SHA256** with high iteration counts (100,000+) and cryptographically secure random salts.
 - **Mandatory Authenticity:** An HMAC-SHA256 signature is calculated over the entire packet and verified **before** any decryption operations are attempted.
 
-## 2. Sealed Conduction (The Machine vs. Recipe)
+## 2. Open Source Engines
 The SDK is fully open source. Engine source is MIT-licensed in `engines/`. A hardened Docker decoder is also provided for air-gapped offline recovery:
 - **Open Source Engines:** All 12 compression codecs are available in `engines/` (Python, MIT).
 - **Docker Decoder:** Hardened offline recovery path with `--network=none`, read-only rootfs, dropped caps.

@@ -4,7 +4,7 @@ This directory contains the specification and build harness for the Liquefy Seal
 
 ## Overview
 
-The appliance is a "Blackbox" container designed for maximum security and IP protection. It allows enterprise customers to decompress and verify archives locally while ensuring the proprietary compression kernels remain protected.
+The appliance is a hardened Docker container for air-gapped offline recovery. It runs with `--network=none`, read-only rootfs, and dropped caps. Engine source is MIT-licensed in `engines/`.
 
 ## Security Features
 

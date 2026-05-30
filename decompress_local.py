@@ -3,11 +3,10 @@
 Liquefy Local Decompressor (Public Reference Path)
 =================================================
 Provides SHA-256 integrity verification against proof-pack/hashes.txt,
-and directs users to the appropriate engine or sealed decoder for actual
-decompression.
+and directs users to the open-source engines in engines/ for decompression.
 
-For enterprise-grade, hardened restoration, use the sealed decoder appliance.
-Visit: https://github.com/Parad0x-Labs/liquefy/blob/master/docs/enterprise-evaluation.md
+Engine source: https://github.com/Parad0x-Labs/liquefy/tree/master/engines
+Docker decoder: ./liquefy decompress <archive> <output>
 """
 
 import argparse
@@ -96,14 +95,14 @@ def main():
         verify_archive(args.archive, hashes_file)
         # verify_archive exits; no fall-through
 
-    # Decompression path — no sealed engine bundled in this public reference script
+    # Decompression path — use the open-source engines directly
     print()
     print("The Python engines are in engines/ — use them directly for decompression.")
     print("Example:")
     print("  python engines/json_codec/NULL_Json_Columnar_Gun_v1.py")
     print()
-    print("For bit-perfect, enterprise-grade restoration use the sealed decoder appliance:")
-    print("  docker run --rm -v \"$(pwd)\":/data parad0xlabs/liquefy-decoder:latest /data/<archive>")
+    print("For the hardened offline Docker path:")
+    print("  ./liquefy decompress <archive> <output>")
     sys.exit(0)
 
 

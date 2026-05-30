@@ -4,7 +4,7 @@
 > This guide applies to the **licensed enterprise engine (Path B)**.  
 > If you only need to recover or verify existing archives without compression, use the **Public Decode-Only Appliance (Path C)** instead.
 
-This guide describes how to verify the **Zero-Persistence** and **Bit-Perfect** guarantees of the Liquefy platform using the sealed decoder appliance.
+This guide describes how to verify the **Zero-Persistence** and **Bit-Perfect** guarantees of the Liquefy platform using the Docker decoder appliance.
 
 ## Prerequisites
 
@@ -20,7 +20,7 @@ docker pull parad0xlabs/liquefy-decoder:eval
 ```
 
 ## Step 2: Network-Off Verification
-To prove the "Blackbox" is truly autonomous, you can disable all network access before running.
+To confirm the decoder runs fully offline, disable network access before running.
 
 ```bash
 # Verify integrity without network

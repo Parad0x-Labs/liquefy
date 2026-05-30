@@ -12,7 +12,7 @@
 
 This report documents the rigorous "FinTech-Grade" certification of the Liquefy compression stack. Over 13 hours of systematic stress-testing across 24 engine combinations, we have verified that Liquefy achieves **100% bit-perfect restoration** while delivering industry-leading compression ratios for enterprise telemetry.
 
-Using only publicly available SDK tools and the sealed decoder appliance, we validated 58MB of production-scale logs with zero failures.
+Using only the open-source engine suite and Docker decoder, we validated 58MB of production-scale logs with zero failures.
 
 ### Key Performance Indicators (KPIs)
 *   **Restoration Integrity:** 100% (Bit-for-Bit Identity)
@@ -67,7 +67,7 @@ We tested Liquefy against realistic enterprise datasets. Below are the results c
 
 ## 🛠️ Public Audit Guarantee
 
-All tests were performed using **publicly available tools only**. No proprietary local-only code was used for these verifications.
+All tests were performed using the open-source engine suite in this repository. Engine source is MIT-licensed in `engines/`.
 
 *   **Repository Source:** `https://github.com/Parad0x-Labs/liquefy.git`
 *   **Public Decoder:** `nullaai/liquefy-decoder-public:latest`

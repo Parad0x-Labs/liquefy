@@ -43,6 +43,6 @@ The decoder uses stable exit codes for automation:
 
 1. **Human-Readable:** Default output is designed for terminal clarity.
 2. **Machine-Readable:** `--json` flag provides stable schema for orchestration.
-3. **Privacy:** The decoder never prints internal engine names, tuning parameters, or proprietary heuristics.
+3. **Privacy:** The decoder never prints key material, tenant secrets, or internal routing state.
 4. **Security:** Stack traces and internal symbols are suppressed in production builds.
 

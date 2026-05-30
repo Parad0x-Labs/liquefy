@@ -38,7 +38,7 @@ The license is a simple JSON file, typically named `liquefy.lic`. It is mounted 
 
 1. **Embedded Public Key:** The decoder binary contains an embedded public key.
 2. **Cryptographic Validation:** Upon startup, the decoder validates the JSON structure and the cryptographic signature.
-3. **No Network Required:** Validation is purely mathematical and happens locally within the "Blackbox."
+3. **No Network Required:** Validation is purely mathematical and happens locally.
 
 ## Deployment
 
