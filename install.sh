@@ -1,21 +1,36 @@
-#!/bin/bash
-# --- $NULL SOVEREIGN SDK INSTALLER ---
-# This script prepares your environment for offline .null recovery.
+#!/usr/bin/env bash
+# Liquefy — one-command install
+# Linux / macOS / WSL / Git Bash
+set -e
 
-echo "--- Parad0x Labs: Sovereign SDK Setup ---"
+echo ""
+echo "  Liquefy — columnar compression that beats Zstd"
+echo "  github.com/Parad0x-Labs/liquefy"
+echo ""
 
-# Check for Docker
-if ! [ -x "$(command -v docker)" ]; then
-  echo "[-] Error: Docker is not installed. This SDK requires Docker for the hardened conduction environment."
-  exit 1
+# Python SDK
+if command -v pip &>/dev/null; then
+  echo "  [1/2] installing Python SDK..."
+  pip install -q -r requirements.txt
+  pip install -q -e .
+  echo "  ✓  Python SDK ready"
+  echo "       from liquefy import compress, decompress, search"
+else
+  echo "  [1/2] pip not found — skipping Python SDK"
+  echo "        install Python 3.9+ then rerun this script"
 fi
 
-echo "[+] Pulling Hardened $NULL Appliance..."
-docker pull nullaai/liquefy-decoder-public@sha256:b7a0499f38d192e7333c760fcf8e429abcff83e58610259841f2ffb525c02935
+# CLI wrapper
+chmod +x ./liquefy 2>/dev/null || true
+echo "  ✓  CLI ready: ./liquefy compress / decompress / verify / search"
 
-echo "[+] Setting up 'liquefy' CLI command..."
-chmod +x ./liquefy
-echo "[+] Done. Run: ./liquefy version"
-
-echo "[!] SDK Ready. You can now use './liquefy decompress <file.null>' for data recovery."
-
+echo ""
+echo "  Quick test:"
+echo "    python -c \"from liquefy import compress,decompress; d=b'{\"x\":1}\\n'*1000; assert decompress(compress(d))==d; print('✓ works')\""
+echo ""
+echo "  Benchmark vs Zstd:"
+echo "    python tools/benchmark.py"
+echo ""
+echo "  Docs:  github.com/Parad0x-Labs/liquefy"
+echo "  x402:  github.com/Parad0x-Labs/dna-x402"
+echo ""

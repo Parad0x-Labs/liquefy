@@ -141,37 +141,91 @@ The anchor program is live on Solana mainnet. The TypeScript port is at [`packag
 
 ---
 
-## Getting started
+## Install
 
+**One command:**
 ```bash
-git clone https://github.com/Parad0x-Labs/liquefy.git
-cd liquefy
+git clone https://github.com/Parad0x-Labs/liquefy.git && cd liquefy && bash install.sh
 ```
 
-**Compress** (Python — requires `zstandard` + `cryptography`):
+**Or pip only:**
 ```bash
-pip install zstandard cryptography
-python -m engines.orchestrator compress input.jsonl output.null
+pip install git+https://github.com/Parad0x-Labs/liquefy.git
 ```
 
-**Decompress** (Docker, offline, no install required):
-```bash
-./liquefy decompress archive.null restored.jsonl
-./liquefy verify archive.null
+---
+
+## Python SDK
+
+```python
+from liquefy import compress, decompress, search
+
+# Compress — 33-61× smaller on structured JSON
+blob = compress(open("agent-logs.jsonl", "rb").read())
+
+# Decompress — bit-perfect
+original = decompress(blob)
+
+# Search without full decompress — 5-61× faster than Zstd
+result = search(blob, "trace-00049999")
+print(result["found"], result["latency_ms"], "ms")
+
+# Encrypted (private agent receipts — AES-256-GCM)
+from liquefy import compress_encrypted, decompress_encrypted
+import os
+key = os.urandom(32)
+private_blob = compress_encrypted(data, key)
+data_back    = decompress_encrypted(private_blob, key)
 ```
 
-**Benchmark vs Zstd**:
+**CLI (same API):**
 ```bash
-python tools/benchmark.py --input your_data.jsonl
+liquefy compress   input.jsonl   output.null
+liquefy decompress output.null   restored.jsonl
+liquefy verify     input.jsonl                   # bit-perfect round-trip check
+liquefy search     output.null   "trace-00049"
+liquefy benchmark                                # head-to-head vs Zstd
 ```
 
-**TypeScript** (Node 22+ / browser, via dna-x402):
+---
+
+## TypeScript / Node 22+ (via dna-x402)
+
+For AI agent payment receipt batching on Solana:
+
+```bash
+# inside dna-x402
+npm install  # @dna-x402/liquefy-receipts is in packages/liquefy-receipts/
+```
+
 ```ts
-import { compressReceipts, netReceipts } from "@dna-x402/liquefy-receipts";
+import { compressReceipts, netReceipts, buildAnchorIxData } from "@dna-x402/liquefy-receipts";
 
-const compressed = compressReceipts(receipts);  // 62× smaller
-const nets       = netReceipts(receipts);        // bilateral netting before anchor
+const nets       = netReceipts(receipts);          // bilateral netting
+const compressed = compressReceipts(receipts);     // 62× smaller
+const ixData     = buildAnchorIxData({ batchBytes: compressed, receiptCount: receipts.length, ... });
+// → 1 Solana tx instead of 1000
 ```
+
+Source: [`packages/liquefy-receipts/`](https://github.com/Parad0x-Labs/dna-x402/tree/main/packages/liquefy-receipts)
+
+---
+
+## Benchmark vs Zstd
+
+```bash
+python tools/benchmark.py
+```
+
+Expected output:
+```
+Standard Zstd (L19): XX MB (Ratio: 5–43×)
+Liquefy COL1  (L22): XX MB (Ratio: 33–61×)
+Search — Zstd:   26–245 ms  (must fully decompress)
+Search — Liquefy: 4–6 ms    (columnar skip — only reads the queried column)
+```
+
+Ratio range depends on data repetitiveness. Search advantage is consistent — it's architectural.
 
 ---
 
