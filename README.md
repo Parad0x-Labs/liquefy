@@ -2,7 +2,7 @@
 
 Columnar compression that beats Zstd on structured data. Built-in search. AES-256-GCM. MIT.
 
-Format-aware columnar compression for structured data. 226x on JSON logs, 876x on payment receipts. Lossless and searchable without decompression.
+Format-aware columnar compression. 226x on JSON logs, 876x on payment receipts. Lossless and searchable without full decompression. Used in DNA x402 for AI agent payment receipt compression on Solana.
 
 ### How this fits the Parad0x stack
 
@@ -21,6 +21,13 @@ Parad0x Labs builds Web0 on Solana — money and agents that settle themselves. 
 
 ---
 
-See the full documentation in this repository.
+Full documentation, benchmarks, and proof-pack are in this repository.
+
+```python
+pip install liquefy
+from liquefy import compress_records
+blob = compress_records(receipts)          # 876x on x402 receipts
+commitment = sha256(blob).digest()         # 32 bytes — ready to anchor on Solana
+```
 
 **License:** MIT — © 2026 Parad0x Labs
