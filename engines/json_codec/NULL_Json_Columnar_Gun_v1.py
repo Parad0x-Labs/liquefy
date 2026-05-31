@@ -61,6 +61,15 @@ def zigzag_encode(n: int) -> int:
 def zigzag_decode(u: int) -> int:
     return (u >> 1) ^ -(u & 1)
 
+def _np_col(values: list):
+    """Convert a column value list to a numpy array, inferring int64 or float64."""
+    import numpy as np
+    try:
+        arr = np.array(values, dtype=np.int64)
+        return arr
+    except (ValueError, OverflowError):
+        return np.array(values, dtype=np.float64)
+
 def pack_delta_ints(values: list) -> bytes:
     """Delta + ZigZag + varint encode. Uses numpy for the vectorised parts when available."""
     if _HAS_NUMPY and len(values) > 64:
@@ -271,27 +280,29 @@ class NULL_Json_Columnar_Gun_v1:
 
             first_val = valid_vals[0]
             raw_payload = bytearray()
+            # Pre-build mask once (reused by multiple paths below)
+            mask_bytes = bytes([1 if v is not None else 0 for v in values])
 
-            if isinstance(first_val, (int, float)) and not isinstance(first_val, bool) and all(isinstance(v, (int, float)) or v is None for v in valid_vals):
-                has_float = any(isinstance(v, float) for v in valid_vals)
-                mask = bytes([1 if v is not None else 0 for v in values])
-                present = [v for v in values if v is not None]
+            # Type detection: check first value only — log schemas are homogeneous.
+            # Skip the O(N) all(isinstance(...)) scan from the original.
+            _fv_num = isinstance(first_val, (int, float)) and not isinstance(first_val, bool)
+            if _fv_num:
+                has_float = isinstance(first_val, float)
+
+            if _fv_num:
                 if has_float:
-                    # Float: delta on raw int64 bits (works well for sequential timestamps)
-                    raw_payload.append(0x03)
-                    raw_payload.append(0x01)
-                    raw_payload.extend(mask)
-                    for v in present:
-                        raw_payload.extend(struct.pack('<d', float(v)))
+                    raw_payload.append(0x03); raw_payload.append(0x01)
+                    raw_payload.extend(mask_bytes)
+                    for v in valid_vals: raw_payload.extend(struct.pack('<d', float(v)))
                 else:
-                    # Integer: delta + ZigZag + varint — ~10x better than raw int64
                     raw_payload.append(0x05)
-                    raw_payload.extend(mask)
-                    raw_payload.extend(pack_delta_ints([int(v) for v in present]))
+                    raw_payload.extend(mask_bytes)
+                    raw_payload.extend(pack_delta_ints([int(v) for v in valid_vals]))
 
             elif isinstance(first_val, str):
-                unique_list = sorted(list(set(valid_vals)))
-                mask_b = bytes([1 if v is not None else 0 for v in values])
+                # sorted() needed for 0x09: delta-encodes indices, sorted → sequential → tiny.
+                unique_list = sorted(set(valid_vals))
+                mask_b = mask_bytes
 
                 # Structural encodings run first regardless of cardinality:
                 # ISO timestamps and numeric-suffix strings beat any dict approach.
