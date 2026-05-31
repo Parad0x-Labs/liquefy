@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./docs/assets/github-header-liquefy.png" alt="Liquefy - Structured-data compression that beats Zstd" width="100%" />
+</p>
+
 # Liquefy
 
 **Columnar compression that beats Zstd on structured data. Built-in search. Built-in encryption. MIT.**
