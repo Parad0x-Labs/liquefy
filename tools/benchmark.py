@@ -80,9 +80,14 @@ def search_liquefy_optimized(data_compressed, query_str):
     return time.perf_counter() - start, len(matching_indices)
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--lines", type=int, default=50000, help="Number of log lines (default 50000)")
+    args = ap.parse_args()
+
     print("=== Liquefy vs Zstd: Columnar Compression Benchmark ===")
-    print("Dataset: 50,000 JSON log lines (~10MB raw)")
-    raw_data = generate_sample_logs(50000)
+    print(f"Dataset: {args.lines:,} JSON log lines")
+    raw_data = generate_sample_logs(args.lines)
     raw_size = len(raw_data) / (1024*1024)
     print(f"Raw Size: {raw_size:.2f} MB")
     print("-" * 40)

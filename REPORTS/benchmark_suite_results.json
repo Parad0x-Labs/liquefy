@@ -1,0 +1,718 @@
+{
+  "json": [
+    {
+      "compressor": "Liquefy COL",
+      "raw_bytes": 750729,
+      "compressed_bytes": 22345,
+      "ratio": 33.6,
+      "compress_mbs": 0.9,
+      "decompress_mbs": 22.2,
+      "bit_perfect": true,
+      "search_ms": 0.41,
+      "search_hits": 2
+    },
+    {
+      "compressor": "Zstd L3",
+      "raw_bytes": 750729,
+      "compressed_bytes": 19916,
+      "ratio": 37.69,
+      "compress_mbs": 203.8,
+      "decompress_mbs": 1129.4,
+      "bit_perfect": true,
+      "search_ms": 2.1,
+      "search_hits": 0
+    },
+    {
+      "compressor": "Zstd L9",
+      "raw_bytes": 750729,
+      "compressed_bytes": 20652,
+      "ratio": 36.35,
+      "compress_mbs": 74.5,
+      "decompress_mbs": 1113.5,
+      "bit_perfect": true,
+      "search_ms": 2.28,
+      "search_hits": 0
+    },
+    {
+      "compressor": "Zstd L19",
+      "raw_bytes": 750729,
+      "compressed_bytes": 16146,
+      "ratio": 46.5,
+      "compress_mbs": 1.5,
+      "decompress_mbs": 910.6,
+      "bit_perfect": true,
+      "search_ms": 2.38,
+      "search_hits": 0
+    },
+    {
+      "compressor": "Zstd L22",
+      "raw_bytes": 750729,
+      "compressed_bytes": 16146,
+      "ratio": 46.5,
+      "compress_mbs": 0.6,
+      "decompress_mbs": 993.7,
+      "bit_perfect": true,
+      "search_ms": 2.46,
+      "search_hits": 0
+    },
+    {
+      "compressor": "LZ4",
+      "raw_bytes": 750729,
+      "compressed_bytes": 105194,
+      "ratio": 7.14,
+      "compress_mbs": 1372.1,
+      "decompress_mbs": 1401.4,
+      "bit_perfect": true,
+      "search_ms": 2.03,
+      "search_hits": 0
+    },
+    {
+      "compressor": "Brotli Q5",
+      "raw_bytes": 750729,
+      "compressed_bytes": 16543,
+      "ratio": 45.38,
+      "compress_mbs": 91.6,
+      "decompress_mbs": 399.3,
+      "bit_perfect": true,
+      "search_ms": 2.57,
+      "search_hits": 0
+    },
+    {
+      "compressor": "Brotli Q9",
+      "raw_bytes": 750729,
+      "compressed_bytes": 13542,
+      "ratio": 55.44,
+      "compress_mbs": 38.1,
+      "decompress_mbs": 723.4,
+      "bit_perfect": true,
+      "search_ms": 2.99,
+      "search_hits": 0
+    },
+    {
+      "compressor": "Brotli Q11",
+      "raw_bytes": 750729,
+      "compressed_bytes": 12756,
+      "ratio": 58.85,
+      "compress_mbs": 0.6,
+      "decompress_mbs": 821.8,
+      "bit_perfect": true,
+      "search_ms": 3.66,
+      "search_hits": 0
+    },
+    {
+      "compressor": "gzip -6",
+      "raw_bytes": 750729,
+      "compressed_bytes": 57037,
+      "ratio": 13.16,
+      "compress_mbs": 133.4,
+      "decompress_mbs": 328.3,
+      "bit_perfect": true,
+      "search_ms": 4.09,
+      "search_hits": 0
+    },
+    {
+      "compressor": "gzip -9",
+      "raw_bytes": 750729,
+      "compressed_bytes": 55972,
+      "ratio": 13.41,
+      "compress_mbs": 69.2,
+      "decompress_mbs": 464.7,
+      "bit_perfect": true,
+      "search_ms": 3.19,
+      "search_hits": 0
+    }
+  ],
+  "payments": [
+    {
+      "compressor": "Liquefy COL",
+      "raw_bytes": 604189,
+      "compressed_bytes": 9212,
+      "ratio": 65.59,
+      "compress_mbs": 1.7,
+      "decompress_mbs": 19.9,
+      "bit_perfect": true,
+      "search_ms": 0.21,
+      "search_hits": 2
+    },
+    {
+      "compressor": "Zstd L3",
+      "raw_bytes": 604189,
+      "compressed_bytes": 14928,
+      "ratio": 40.47,
+      "compress_mbs": 642.6,
+      "decompress_mbs": 1311.0,
+      "bit_perfect": true,
+      "search_ms": 1.94,
+      "search_hits": 0
+    },
+    {
+      "compressor": "Zstd L9",
+      "raw_bytes": 604189,
+      "compressed_bytes": 12140,
+      "ratio": 49.77,
+      "compress_mbs": 78.0,
+      "decompress_mbs": 983.9,
+      "bit_perfect": true,
+      "search_ms": 1.95,
+      "search_hits": 0
+    },
+    {
+      "compressor": "Zstd L19",
+      "raw_bytes": 604189,
+      "compressed_bytes": 15033,
+      "ratio": 40.19,
+      "compress_mbs": 1.3,
+      "decompress_mbs": 1244.5,
+      "bit_perfect": true,
+      "search_ms": 1.81,
+      "search_hits": 0
+    },
+    {
+      "compressor": "Zstd L22",
+      "raw_bytes": 604189,
+      "compressed_bytes": 15211,
+      "ratio": 39.72,
+      "compress_mbs": 1.2,
+      "decompress_mbs": 1292.2,
+      "bit_perfect": true,
+      "search_ms": 1.81,
+      "search_hits": 0
+    },
+    {
+      "compressor": "LZ4",
+      "raw_bytes": 604189,
+      "compressed_bytes": 88755,
+      "ratio": 6.81,
+      "compress_mbs": 1527.6,
+      "decompress_mbs": 1347.5,
+      "bit_perfect": true,
+      "search_ms": 1.9,
+      "search_hits": 0
+    },
+    {
+      "compressor": "Brotli Q5",
+      "raw_bytes": 604189,
+      "compressed_bytes": 13603,
+      "ratio": 44.42,
+      "compress_mbs": 102.5,
+      "decompress_mbs": 636.6,
+      "bit_perfect": true,
+      "search_ms": 2.28,
+      "search_hits": 0
+    },
+    {
+      "compressor": "Brotli Q9",
+      "raw_bytes": 604189,
+      "compressed_bytes": 13252,
+      "ratio": 45.59,
+      "compress_mbs": 34.0,
+      "decompress_mbs": 759.5,
+      "bit_perfect": true,
+      "search_ms": 2.68,
+      "search_hits": 0
+    },
+    {
+      "compressor": "Brotli Q11",
+      "raw_bytes": 604189,
+      "compressed_bytes": 12279,
+      "ratio": 49.21,
+      "compress_mbs": 0.5,
+      "decompress_mbs": 742.9,
+      "bit_perfect": true,
+      "search_ms": 3.26,
+      "search_hits": 0
+    },
+    {
+      "compressor": "gzip -6",
+      "raw_bytes": 604189,
+      "compressed_bytes": 43415,
+      "ratio": 13.92,
+      "compress_mbs": 127.9,
+      "decompress_mbs": 502.5,
+      "bit_perfect": true,
+      "search_ms": 3.23,
+      "search_hits": 0
+    },
+    {
+      "compressor": "gzip -9",
+      "raw_bytes": 604189,
+      "compressed_bytes": 42461,
+      "ratio": 14.23,
+      "compress_mbs": 74.5,
+      "decompress_mbs": 474.7,
+      "bit_perfect": true,
+      "search_ms": 2.6,
+      "search_hits": 0
+    }
+  ],
+  "nginx": [
+    {
+      "compressor": "Zstd L3",
+      "raw_bytes": 464543,
+      "compressed_bytes": 49947,
+      "ratio": 9.3,
+      "compress_mbs": 433.3,
+      "decompress_mbs": 947.6,
+      "bit_perfect": true,
+      "search_ms": 1.91,
+      "search_hits": 50
+    },
+    {
+      "compressor": "Zstd L9",
+      "raw_bytes": 464543,
+      "compressed_bytes": 36048,
+      "ratio": 12.89,
+      "compress_mbs": 80.1,
+      "decompress_mbs": 1527.7,
+      "bit_perfect": true,
+      "search_ms": 1.8,
+      "search_hits": 50
+    },
+    {
+      "compressor": "Zstd L19",
+      "raw_bytes": 464543,
+      "compressed_bytes": 27860,
+      "ratio": 16.67,
+      "compress_mbs": 1.5,
+      "decompress_mbs": 1455.9,
+      "bit_perfect": true,
+      "search_ms": 1.74,
+      "search_hits": 50
+    },
+    {
+      "compressor": "Zstd L22",
+      "raw_bytes": 464543,
+      "compressed_bytes": 27860,
+      "ratio": 16.67,
+      "compress_mbs": 1.4,
+      "decompress_mbs": 1752.5,
+      "bit_perfect": true,
+      "search_ms": 1.78,
+      "search_hits": 50
+    },
+    {
+      "compressor": "LZ4",
+      "raw_bytes": 464543,
+      "compressed_bytes": 87555,
+      "ratio": 5.31,
+      "compress_mbs": 1000.3,
+      "decompress_mbs": 1330.8,
+      "bit_perfect": true,
+      "search_ms": 1.81,
+      "search_hits": 50
+    },
+    {
+      "compressor": "Brotli Q5",
+      "raw_bytes": 464543,
+      "compressed_bytes": 29687,
+      "ratio": 15.65,
+      "compress_mbs": 84.1,
+      "decompress_mbs": 590.1,
+      "bit_perfect": true,
+      "search_ms": 2.18,
+      "search_hits": 50
+    },
+    {
+      "compressor": "Brotli Q9",
+      "raw_bytes": 464543,
+      "compressed_bytes": 16724,
+      "ratio": 27.78,
+      "compress_mbs": 31.1,
+      "decompress_mbs": 653.0,
+      "bit_perfect": true,
+      "search_ms": 2.13,
+      "search_hits": 50
+    },
+    {
+      "compressor": "Brotli Q11",
+      "raw_bytes": 464543,
+      "compressed_bytes": 15151,
+      "ratio": 30.66,
+      "compress_mbs": 0.5,
+      "decompress_mbs": 387.9,
+      "bit_perfect": true,
+      "search_ms": 2.22,
+      "search_hits": 50
+    },
+    {
+      "compressor": "gzip -6",
+      "raw_bytes": 464543,
+      "compressed_bytes": 40999,
+      "ratio": 11.33,
+      "compress_mbs": 77.4,
+      "decompress_mbs": 385.4,
+      "bit_perfect": true,
+      "search_ms": 2.48,
+      "search_hits": 50
+    },
+    {
+      "compressor": "gzip -9",
+      "raw_bytes": 464543,
+      "compressed_bytes": 39657,
+      "ratio": 11.71,
+      "compress_mbs": 55.9,
+      "decompress_mbs": 379.3,
+      "bit_perfect": true,
+      "search_ms": 2.45,
+      "search_hits": 50
+    }
+  ],
+  "k8s": [
+    {
+      "compressor": "Liquefy COL",
+      "raw_bytes": 762250,
+      "compressed_bytes": 1602,
+      "ratio": 475.81,
+      "compress_mbs": 13.5,
+      "decompress_mbs": 29.3,
+      "bit_perfect": true,
+      "search_ms": 0.13,
+      "search_hits": 2
+    },
+    {
+      "compressor": "Zstd L3",
+      "raw_bytes": 762250,
+      "compressed_bytes": 4338,
+      "ratio": 175.71,
+      "compress_mbs": 1493.6,
+      "decompress_mbs": 3084.2,
+      "bit_perfect": true,
+      "search_ms": 1.81,
+      "search_hits": 250
+    },
+    {
+      "compressor": "Zstd L9",
+      "raw_bytes": 762250,
+      "compressed_bytes": 2426,
+      "ratio": 314.2,
+      "compress_mbs": 200.6,
+      "decompress_mbs": 3476.5,
+      "bit_perfect": true,
+      "search_ms": 1.85,
+      "search_hits": 250
+    },
+    {
+      "compressor": "Zstd L19",
+      "raw_bytes": 762250,
+      "compressed_bytes": 2055,
+      "ratio": 370.92,
+      "compress_mbs": 6.4,
+      "decompress_mbs": 3213.7,
+      "bit_perfect": true,
+      "search_ms": 1.89,
+      "search_hits": 250
+    },
+    {
+      "compressor": "Zstd L22",
+      "raw_bytes": 762250,
+      "compressed_bytes": 2055,
+      "ratio": 370.92,
+      "compress_mbs": 6.1,
+      "decompress_mbs": 3066.0,
+      "bit_perfect": true,
+      "search_ms": 3.35,
+      "search_hits": 250
+    },
+    {
+      "compressor": "LZ4",
+      "raw_bytes": 762250,
+      "compressed_bytes": 42224,
+      "ratio": 18.05,
+      "compress_mbs": 3850.3,
+      "decompress_mbs": 1476.0,
+      "bit_perfect": true,
+      "search_ms": 3.92,
+      "search_hits": 250
+    },
+    {
+      "compressor": "Brotli Q5",
+      "raw_bytes": 762250,
+      "compressed_bytes": 1583,
+      "ratio": 481.52,
+      "compress_mbs": 293.3,
+      "decompress_mbs": 514.8,
+      "bit_perfect": true,
+      "search_ms": 3.96,
+      "search_hits": 250
+    },
+    {
+      "compressor": "Brotli Q9",
+      "raw_bytes": 762250,
+      "compressed_bytes": 1479,
+      "ratio": 515.38,
+      "compress_mbs": 156.5,
+      "decompress_mbs": 605.0,
+      "bit_perfect": true,
+      "search_ms": 3.39,
+      "search_hits": 250
+    },
+    {
+      "compressor": "Brotli Q11",
+      "raw_bytes": 762250,
+      "compressed_bytes": 1272,
+      "ratio": 599.25,
+      "compress_mbs": 3.1,
+      "decompress_mbs": 550.5,
+      "bit_perfect": true,
+      "search_ms": 4.69,
+      "search_hits": 250
+    },
+    {
+      "compressor": "gzip -6",
+      "raw_bytes": 762250,
+      "compressed_bytes": 22800,
+      "ratio": 33.43,
+      "compress_mbs": 172.9,
+      "decompress_mbs": 412.2,
+      "bit_perfect": true,
+      "search_ms": 3.53,
+      "search_hits": 250
+    },
+    {
+      "compressor": "gzip -9",
+      "raw_bytes": 762250,
+      "compressed_bytes": 15692,
+      "ratio": 48.58,
+      "compress_mbs": 86.4,
+      "decompress_mbs": 515.9,
+      "bit_perfect": true,
+      "search_ms": 3.19,
+      "search_hits": 250
+    }
+  ],
+  "syslog": [
+    {
+      "compressor": "Zstd L3",
+      "raw_bytes": 461889,
+      "compressed_bytes": 15775,
+      "ratio": 29.28,
+      "compress_mbs": 397.2,
+      "decompress_mbs": 1290.6,
+      "bit_perfect": true,
+      "search_ms": 2.27,
+      "search_hits": 500
+    },
+    {
+      "compressor": "Zstd L9",
+      "raw_bytes": 461889,
+      "compressed_bytes": 10875,
+      "ratio": 42.47,
+      "compress_mbs": 84.5,
+      "decompress_mbs": 1809.0,
+      "bit_perfect": true,
+      "search_ms": 2.02,
+      "search_hits": 500
+    },
+    {
+      "compressor": "Zstd L19",
+      "raw_bytes": 461889,
+      "compressed_bytes": 11190,
+      "ratio": 41.28,
+      "compress_mbs": 1.3,
+      "decompress_mbs": 1680.0,
+      "bit_perfect": true,
+      "search_ms": 1.84,
+      "search_hits": 500
+    },
+    {
+      "compressor": "Zstd L22",
+      "raw_bytes": 461889,
+      "compressed_bytes": 11190,
+      "ratio": 41.28,
+      "compress_mbs": 1.0,
+      "decompress_mbs": 1647.9,
+      "bit_perfect": true,
+      "search_ms": 1.95,
+      "search_hits": 500
+    },
+    {
+      "compressor": "LZ4",
+      "raw_bytes": 461889,
+      "compressed_bytes": 80335,
+      "ratio": 5.75,
+      "compress_mbs": 1155.5,
+      "decompress_mbs": 1266.9,
+      "bit_perfect": true,
+      "search_ms": 2.12,
+      "search_hits": 500
+    },
+    {
+      "compressor": "Brotli Q5",
+      "raw_bytes": 461889,
+      "compressed_bytes": 9160,
+      "ratio": 50.42,
+      "compress_mbs": 102.5,
+      "decompress_mbs": 688.9,
+      "bit_perfect": true,
+      "search_ms": 2.07,
+      "search_hits": 500
+    },
+    {
+      "compressor": "Brotli Q9",
+      "raw_bytes": 461889,
+      "compressed_bytes": 8579,
+      "ratio": 53.84,
+      "compress_mbs": 34.7,
+      "decompress_mbs": 683.7,
+      "bit_perfect": true,
+      "search_ms": 1.94,
+      "search_hits": 500
+    },
+    {
+      "compressor": "Brotli Q11",
+      "raw_bytes": 461889,
+      "compressed_bytes": 5996,
+      "ratio": 77.03,
+      "compress_mbs": 0.5,
+      "decompress_mbs": 680.2,
+      "bit_perfect": true,
+      "search_ms": 2.14,
+      "search_hits": 500
+    },
+    {
+      "compressor": "gzip -6",
+      "raw_bytes": 461889,
+      "compressed_bytes": 30094,
+      "ratio": 15.35,
+      "compress_mbs": 118.0,
+      "decompress_mbs": 388.5,
+      "bit_perfect": true,
+      "search_ms": 2.53,
+      "search_hits": 500
+    },
+    {
+      "compressor": "gzip -9",
+      "raw_bytes": 461889,
+      "compressed_bytes": 29389,
+      "ratio": 15.72,
+      "compress_mbs": 74.1,
+      "decompress_mbs": 369.1,
+      "bit_perfect": true,
+      "search_ms": 2.87,
+      "search_hits": 500
+    }
+  ],
+  "sql": [
+    {
+      "compressor": "Liquefy COL",
+      "raw_bytes": 680289,
+      "compressed_bytes": 11064,
+      "ratio": 61.49,
+      "compress_mbs": 0.8,
+      "decompress_mbs": 23.4,
+      "bit_perfect": true,
+      "search_ms": 81.98,
+      "search_hits": 2
+    },
+    {
+      "compressor": "Zstd L3",
+      "raw_bytes": 680289,
+      "compressed_bytes": 34044,
+      "ratio": 19.98,
+      "compress_mbs": 493.0,
+      "decompress_mbs": 1419.3,
+      "bit_perfect": true,
+      "search_ms": 2.18,
+      "search_hits": 1000
+    },
+    {
+      "compressor": "Zstd L9",
+      "raw_bytes": 680289,
+      "compressed_bytes": 33823,
+      "ratio": 20.11,
+      "compress_mbs": 63.6,
+      "decompress_mbs": 1304.9,
+      "bit_perfect": true,
+      "search_ms": 2.06,
+      "search_hits": 1000
+    },
+    {
+      "compressor": "Zstd L19",
+      "raw_bytes": 680289,
+      "compressed_bytes": 24277,
+      "ratio": 28.02,
+      "compress_mbs": 1.3,
+      "decompress_mbs": 1252.2,
+      "bit_perfect": true,
+      "search_ms": 2.14,
+      "search_hits": 1000
+    },
+    {
+      "compressor": "Zstd L22",
+      "raw_bytes": 680289,
+      "compressed_bytes": 24424,
+      "ratio": 27.85,
+      "compress_mbs": 0.8,
+      "decompress_mbs": 1291.6,
+      "bit_perfect": true,
+      "search_ms": 2.11,
+      "search_hits": 1000
+    },
+    {
+      "compressor": "LZ4",
+      "raw_bytes": 680289,
+      "compressed_bytes": 115598,
+      "ratio": 5.88,
+      "compress_mbs": 1110.0,
+      "decompress_mbs": 1306.4,
+      "bit_perfect": true,
+      "search_ms": 2.15,
+      "search_hits": 1000
+    },
+    {
+      "compressor": "Brotli Q5",
+      "raw_bytes": 680289,
+      "compressed_bytes": 22547,
+      "ratio": 30.17,
+      "compress_mbs": 93.6,
+      "decompress_mbs": 661.8,
+      "bit_perfect": true,
+      "search_ms": 2.66,
+      "search_hits": 1000
+    },
+    {
+      "compressor": "Brotli Q9",
+      "raw_bytes": 680289,
+      "compressed_bytes": 21118,
+      "ratio": 32.21,
+      "compress_mbs": 29.3,
+      "decompress_mbs": 631.1,
+      "bit_perfect": true,
+      "search_ms": 2.79,
+      "search_hits": 1000
+    },
+    {
+      "compressor": "Brotli Q11",
+      "raw_bytes": 680289,
+      "compressed_bytes": 14589,
+      "ratio": 46.63,
+      "compress_mbs": 0.6,
+      "decompress_mbs": 662.8,
+      "bit_perfect": true,
+      "search_ms": 2.57,
+      "search_hits": 1000
+    },
+    {
+      "compressor": "gzip -6",
+      "raw_bytes": 680289,
+      "compressed_bytes": 59101,
+      "ratio": 11.51,
+      "compress_mbs": 117.8,
+      "decompress_mbs": 390.2,
+      "bit_perfect": true,
+      "search_ms": 3.18,
+      "search_hits": 1000
+    },
+    {
+      "compressor": "gzip -9",
+      "raw_bytes": 680289,
+      "compressed_bytes": 58501,
+      "ratio": 11.63,
+      "compress_mbs": 71.9,
+      "decompress_mbs": 462.0,
+      "bit_perfect": true,
+      "search_ms": 3.2,
+      "search_hits": 1000
+    }
+  ]
+}
