@@ -164,11 +164,11 @@ def run_gzip(data, level):
     t0 = time.perf_counter(); r = gzip.decompress(c);                        dt = time.perf_counter()-t0
     return c, ct, dt, r
 
-def run_liquefy(data):
+def run_liquefy(data, fast=False):
     if not HAS_LIQUEFY:
         return None
     try:
-        engine = LiquefyJSON(level=22)
+        engine = LiquefyJSON(level=22, fast=fast)
         t0 = time.perf_counter(); c = engine.compress(data);   ct = time.perf_counter()-t0
         t0 = time.perf_counter(); r = engine.decompress(c);    dt = time.perf_counter()-t0
         return c, ct, dt, r
@@ -218,9 +218,10 @@ def benchmark_dataset(name, label, data, run_search, search_query):
             "_blob": c,
         })
 
-    # Liquefy (JSON datasets only)
+    # Liquefy (JSON datasets only) — two modes
     if name in ("json", "payments", "k8s", "sql"):
-        record("Liquefy COL", run_liquefy(data))
+        record("Liquefy fast(L6)", run_liquefy(data, fast=True))
+        record("Liquefy max(L22)", run_liquefy(data, fast=False))
     # Zstd
     for lvl in (3, 9, 19, 22):
         record(f"Zstd L{lvl}", run_zstd(data, lvl))
