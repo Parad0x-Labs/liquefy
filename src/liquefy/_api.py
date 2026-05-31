@@ -8,12 +8,30 @@ import sys
 import os
 from pathlib import Path
 
-# Wire up engine paths
-_ROOT = Path(__file__).resolve().parent.parent.parent
-for _d in (_ROOT / "engines").iterdir():
-    if _d.is_dir() and str(_d) not in sys.path:
-        sys.path.insert(0, str(_d))
-sys.path.insert(0, str(_ROOT / "engines"))
+# Wire up engine paths — works in dev (repo clone) and installed (pip)
+def _wire_engines() -> None:
+    # Installed: engines is a top-level package alongside liquefy
+    try:
+        import engines as _e
+        _ep = Path(_e.__file__).resolve().parent
+        for _d in _ep.iterdir():
+            if _d.is_dir() and str(_d) not in sys.path:
+                sys.path.insert(0, str(_d))
+        if str(_ep) not in sys.path:
+            sys.path.insert(0, str(_ep))
+        return
+    except ImportError:
+        pass
+    # Dev / editable: engines/ at repo root (3 levels up from src/liquefy/_api.py)
+    _ep = Path(__file__).resolve().parent.parent.parent / "engines"
+    if _ep.exists():
+        for _d in _ep.iterdir():
+            if _d.is_dir() and str(_d) not in sys.path:
+                sys.path.insert(0, str(_d))
+        if str(_ep) not in sys.path:
+            sys.path.insert(0, str(_ep))
+
+_wire_engines()
 
 from NULL_Json_Columnar_Gun_v1 import NULL_Json_Columnar_Gun_v1 as _ColGun  # type: ignore
 from security_compliance import NULL_Security_Layer  # type: ignore
