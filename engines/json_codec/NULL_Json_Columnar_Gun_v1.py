@@ -449,15 +449,13 @@ class NULL_Json_Columnar_Gun_v1:
         order_len = struct.unpack('<I', blob[ptr:ptr+4])[0]; ptr += 4
         ptr += order_len # skip key_order
         
-        # READ PRIVACY HEADER
+        # READ PRIVACY HEADER (optional — may be empty)
         p_len = struct.unpack('<I', blob[ptr:ptr+4])[0]; ptr += 4
-        
-        # Count header decode as 'bytes decoded' cost? Technically yes.
-        # But it's metadata. Let's count output bytes.
-        privacy_data = self.dctx.decompress(blob[ptr:ptr+p_len])
-        bytes_decoded += len(privacy_data)
-        
-        privacy_header = json.loads(privacy_data)
+        privacy_header = {}
+        if p_len > 0:
+            privacy_data = self.dctx.decompress(blob[ptr:ptr+p_len])
+            bytes_decoded += len(privacy_data)
+            privacy_header = json.loads(privacy_data)
         ptr += p_len
         
         matching_rows = set()
@@ -506,22 +504,79 @@ class NULL_Json_Columnar_Gun_v1:
                 
             if not col_payload or col_payload == b'\x00': continue
             
-            # SCAN
-            if col_payload.find(query_bytes) == -1:
-                continue
-                
-            # MATCH LOGIC (simplified for brevity, assume optimized byte scan logic from previous step)
+            # SCAN — mode-aware columnar search
             mode = col_payload[0]
-            if mode == 0x01: # Dict
-                pass # (Reuse previous logic)
-            elif mode == 0x02 or mode == 0x04:
-                search_pos = 1
-                while True:
-                    match_pos = col_payload.find(query_bytes, search_pos)
-                    if match_pos == -1: break
-                    row_idx = col_payload.count(b'\x00', 0, match_pos)
-                    matching_rows.add(row_idx)
-                    search_pos = match_pos + 1
+
+            if mode == 0x05:  # Delta-int column: skip unless query is numeric
+                try:
+                    target = int(query_str)
+                    mask = col_payload[1 : 1 + row_count]
+                    present_count = sum(mask)
+                    vals = unpack_delta_ints(col_payload[1 + row_count:], present_count)
+                    it = iter(vals); [matching_rows.add(i) for i, m in enumerate(mask) if m and next(it) == target]
+                except (ValueError, StopIteration):
+                    pass
+
+            elif mode == 0x06:  # Numeric-suffix: extract target int and search delta ints
+                try:
+                    p_l, bp = unpack_varint_buf(col_payload, 1)
+                    prefix = col_payload[bp:bp+p_l].decode('utf-8'); bp += p_l
+                    width  = col_payload[bp]; bp += 1
+                    if query_str.startswith(prefix):
+                        target = int(query_str[len(prefix):])
+                        mask = col_payload[bp : bp + row_count]; bp += row_count
+                        present_count = sum(mask)
+                        vals = unpack_delta_ints(col_payload[bp:], present_count)
+                        it = iter(vals); [matching_rows.add(i) for i, m in enumerate(mask) if m and next(it) == target]
+                except Exception:
+                    pass
+
+            elif mode == 0x08:  # ISO timestamp: convert query to epoch and search
+                try:
+                    suf_len = col_payload[1 + row_count]
+                    iso_ts = _detect_iso_timestamps([query_str])
+                    if iso_ts:
+                        target_ep = iso_ts[0]
+                        mask = col_payload[1 : 1 + row_count]
+                        bp   = 1 + row_count + 1 + suf_len
+                        vals = unpack_delta_ints(col_payload[bp:], sum(mask))
+                        it   = iter(vals); [matching_rows.add(i) for i, m in enumerate(mask) if m and next(it) == target_ep]
+                except Exception:
+                    pass
+
+            elif mode == 0x09:  # Dict+delta: check if query is in dict, find matching rows
+                try:
+                    d_len = struct.unpack('<I', col_payload[1:5])[0]; bp = 5
+                    dict_blob = col_payload[bp:bp+d_len]; bp += d_len
+                    lookup = [s.decode('utf-8') for s in dict_blob.split(b'\x00')]
+                    if query_str in lookup:
+                        target_idx = lookup.index(query_str)
+                        vals = unpack_delta_ints(col_payload[bp:], row_count)
+                        matching_rows.update(i for i, v in enumerate(vals) if v == target_idx)
+                except Exception:
+                    pass
+
+            elif mode == 0x01:  # Dict: check if query in dict, find index, scan indices
+                if col_payload.find(query_bytes) != -1:
+                    dict_n, bp = unpack_varint_buf(col_payload, 1)
+                    lookup = []
+                    for _ in range(dict_n):
+                        s_len, bp = unpack_varint_buf(col_payload, bp)
+                        lookup.append(col_payload[bp:bp+s_len]); bp += s_len
+                    target_idx = next((i for i, v in enumerate(lookup) if v == query_bytes), None)
+                    if target_idx is not None:
+                        indices = col_payload[bp:]
+                        matching_rows.update(i for i, idx in enumerate(indices) if idx == target_idx)
+
+            elif mode in (0x02, 0x04):  # Raw string / complex: byte scan with null counting
+                if col_payload.find(query_bytes) != -1:
+                    search_pos = 1
+                    while True:
+                        match_pos = col_payload.find(query_bytes, search_pos)
+                        if match_pos == -1: break
+                        row_idx = col_payload.count(b'\x00', 0, match_pos)
+                        matching_rows.add(row_idx)
+                        search_pos = match_pos + 1
             
         end_t = time.perf_counter()
         
