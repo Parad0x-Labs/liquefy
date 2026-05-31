@@ -62,7 +62,11 @@ def unpack_delta_ints(data: bytes, count: int) -> list:
     return vals
 
 import re as _re
+from datetime import datetime, timezone as _tz
+
 _NUMERIC_SUFFIX_RE = _re.compile(r'^(.*?)(\d+)$')
+_ISO_TS_RE = _re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}')
+_EPOCH = datetime(1970, 1, 1, tzinfo=_tz.utc)
 
 def _detect_numeric_suffix(values: list):
     """Return (prefix, width, int_list) if all strings share a prefix + zero-padded int suffix."""
@@ -78,11 +82,29 @@ def _detect_numeric_suffix(values: list):
         nums.append(int(m2.group(2)))
     return prefix, width, nums
 
+def _detect_iso_timestamps(values: list):
+    """Return list of epoch-seconds ints if all values look like ISO 8601 timestamps."""
+    if not values or not isinstance(values[0], str): return None
+    if not _ISO_TS_RE.match(values[0]): return None
+    try:
+        result = []
+        for v in values:
+            # Handle "2026-01-01T00:01:01Z", "2026-01-01T00:01:01.123Z", "+00:00" etc.
+            clean = v.rstrip('Z').split('.')[0].replace(' ', 'T')
+            dt = datetime.fromisoformat(clean).replace(tzinfo=_tz.utc)
+            result.append(int((dt - _EPOCH).total_seconds()))
+        return result
+    except Exception:
+        return None
+
 class NULL_Json_Columnar_Gun_v1:
-    def __init__(self, level=22, privacy_noise=0.1):
+    def __init__(self, level=22, privacy_noise=0.1, enable_privacy_header=False):
         self.cctx = zstd.ZstdCompressor(level=level)
         self.dctx = zstd.ZstdDecompressor()
-        self.privacy_noise = privacy_noise # 10% Noise by default
+        self.privacy_noise = privacy_noise
+        # Privacy header (zone maps for search pruning) adds ~100-200 bytes overhead.
+        # Disabled by default — enable only when columnar search pruning is needed.
+        self.enable_privacy_header = enable_privacy_header
 
     def _inject_noise(self, val: float, noise_factor: float) -> float:
         """Inject deterministic noise based on value magnitude."""
@@ -148,30 +170,21 @@ class NULL_Json_Columnar_Gun_v1:
         output_buffer.extend(struct.pack('<I', len(order_json)))
         output_buffer.extend(order_json)
         
-        # 3. WRITE PRIVACY HEADER (Noise-Injected Zone Maps)
-        # We serialize a JSON of the Zone Maps with NOISE added.
-        privacy_header = {}
-        for k, zm in zone_maps.items():
-            p_min = zm["min"]
-            p_max = zm["max"]
-            
-            # Apply Noise to Numerics
-            if zm["type"] in ("int", "float"):
-                p_min = p_min - abs(self._inject_noise(p_min, self.privacy_noise))
-                p_max = p_max + abs(self._inject_noise(p_max, self.privacy_noise))
-            
-            # For strings, we can't easily add 'noise' to min/max chars without breaking sort order logic.
-            # So we only store prefix range or skip noise for strings for now.
-            # Compromise: Store first 4 chars for string pruning.
-            if zm["type"] == "str":
-                p_min = str(p_min)[:4]
-                p_max = str(p_max)[:4] + "~" # Widen the max
-                
-            privacy_header[k] = {"min": p_min, "max": p_max, "type": zm["type"]}
-            
-        header_json = json.dumps(privacy_header).encode('utf-8')
-        # Compress the header too? Yes.
-        header_compressed = self.cctx.compress(header_json)
+        # 3. WRITE PRIVACY HEADER (optional — zone maps for columnar search pruning)
+        if self.enable_privacy_header:
+            privacy_header = {}
+            for k, zm in zone_maps.items():
+                p_min, p_max = zm["min"], zm["max"]
+                if zm["type"] in ("int", "float"):
+                    p_min = p_min - abs(self._inject_noise(p_min, self.privacy_noise))
+                    p_max = p_max + abs(self._inject_noise(p_max, self.privacy_noise))
+                if zm["type"] == "str":
+                    p_min = str(p_min)[:4]
+                    p_max = str(p_max)[:4] + "~"
+                privacy_header[k] = {"min": p_min, "max": p_max, "type": zm["type"]}
+            header_compressed = self.cctx.compress(json.dumps(privacy_header).encode('utf-8'))
+        else:
+            header_compressed = b''
         output_buffer.extend(struct.pack('<I', len(header_compressed)))
         output_buffer.extend(header_compressed)
 
@@ -211,8 +224,31 @@ class NULL_Json_Columnar_Gun_v1:
 
             elif isinstance(first_val, str):
                 unique_list = sorted(list(set(valid_vals)))
-                if len(unique_list) < 256 and len(valid_vals) > 10:
-                    # Low-cardinality: dictionary encode (1 byte per row)
+                mask_b = bytes([1 if v is not None else 0 for v in values])
+
+                # Structural encodings run first regardless of cardinality:
+                # ISO timestamps and numeric-suffix strings beat any dict approach.
+                ns  = _detect_numeric_suffix(valid_vals)
+                iso = None if ns else _detect_iso_timestamps(valid_vals)
+                if ns:
+                    prefix, width, nums = ns
+                    raw_payload.append(0x06)
+                    p_enc = prefix.encode('utf-8')
+                    raw_payload.extend(pack_varint(len(p_enc))); raw_payload.extend(p_enc)
+                    raw_payload.append(width)
+                    raw_payload.extend(mask_b)
+                    raw_payload.extend(pack_delta_ints(nums))
+                elif iso:
+                    raw_payload.append(0x08)
+                    raw_payload.extend(mask_b)
+                    suffix = valid_vals[0][19:]
+                    s_enc = suffix.encode('utf-8')
+                    raw_payload.append(len(s_enc))
+                    raw_payload.extend(s_enc)
+                    raw_payload.extend(pack_delta_ints(iso))
+
+                elif len(unique_list) < 256 and len(valid_vals) > 10:
+                    # Low-cardinality: 1-byte dict indices
                     raw_payload.append(0x01)
                     raw_payload.extend(pack_varint(len(unique_list)))
                     for uv in unique_list:
@@ -222,23 +258,35 @@ class NULL_Json_Columnar_Gun_v1:
                     mapping = {v: i for i, v in enumerate(unique_list)}
                     indices = bytes([mapping[v] if v is not None else 0xFF for v in values])
                     raw_payload.extend(indices)
+
+                elif len(unique_list) < 65536 and len(valid_vals) > 10:
+                    # Mid-cardinality: race two raw payloads, compress both, pick smaller.
+                    # 0x02 = raw null-join (LZ77 finds cycle patterns)
+                    # 0x09 = raw dict + delta-varint indices (outer zstd compresses together)
+                    mapping = {v: i for i, v in enumerate(unique_list)}
+
+                    cand02 = bytearray([0x02])
+                    cand02.extend(b'\x00'.join([v.encode('utf-8') if v is not None else b'\x01' for v in values]))
+
+                    cand09 = bytearray([0x09])
+                    dict_blob = b'\x00'.join(u.encode('utf-8') for u in unique_list)
+                    cand09.extend(struct.pack('<I', len(dict_blob)))
+                    cand09.extend(dict_blob)
+                    idx_seq = [mapping[v] if v is not None else 0 for v in values]
+                    cand09.extend(pack_delta_ints(idx_seq))
+
+                    c02 = self.cctx.compress(bytes(cand02))
+                    c09 = self.cctx.compress(bytes(cand09))
+                    raw_payload.extend(c02 if len(c02) <= len(c09) else c09)
+                    output_buffer.extend(struct.pack('<I', len(raw_payload)))
+                    output_buffer.extend(raw_payload)
+                    continue
+
                 else:
-                    # High-cardinality: try numeric-suffix extraction first
-                    ns = _detect_numeric_suffix(valid_vals)
-                    if ns:
-                        prefix, width, nums = ns
-                        mask_b = bytes([1 if v is not None else 0 for v in values])
-                        raw_payload.append(0x06)
-                        p_enc = prefix.encode('utf-8')
-                        raw_payload.extend(pack_varint(len(p_enc)))
-                        raw_payload.extend(p_enc)
-                        raw_payload.append(width)  # zero-pad width
-                        raw_payload.extend(mask_b)
-                        raw_payload.extend(pack_delta_ints(nums))
-                    else:
-                        raw_payload.append(0x02)
-                        joined = b'\x00'.join([v.encode('utf-8') if v is not None else b'\x01' for v in values])
-                        raw_payload.extend(joined)
+                    # True high-cardinality, no structural pattern — raw join
+                    raw_payload.append(0x02)
+                    joined = b'\x00'.join([v.encode('utf-8') if v is not None else b'\x01' for v in values])
+                    raw_payload.extend(joined)
             else:
                 raw_payload.append(0x04)
                 joined = b'\x00'.join([json.dumps(v).encode('utf-8') if v is not None else b'\x01' for v in values])
@@ -309,6 +357,38 @@ class NULL_Json_Columnar_Gun_v1:
                     lookup.append(payload[b_ptr:b_ptr+s_len].decode('utf-8')); b_ptr += s_len
                 indices = payload[b_ptr:]
                 columns_data[name] = [lookup[i] if i != 0xFF else None for i in indices]
+            elif mode == 0x07: # Mid-cardinality dict, 16-bit fixed indices (legacy)
+                dict_n = struct.unpack('<H', payload[1:3])[0]; b_ptr = 3
+                lookup = []
+                for _ in range(dict_n):
+                    s_len, b_ptr = unpack_varint_buf(payload, b_ptr)
+                    lookup.append(payload[b_ptr:b_ptr+s_len].decode('utf-8')); b_ptr += s_len
+                values = []
+                for i in range(row_count):
+                    idx = struct.unpack('<H', payload[b_ptr:b_ptr+2])[0]; b_ptr += 2
+                    values.append(lookup[idx] if idx != 0xFFFF else None)
+                columns_data[name] = values
+            elif mode == 0x09: # Raw dict + delta-varint indices (outer zstd handles compression)
+                d_len = struct.unpack('<I', payload[1:5])[0]; b_ptr = 5
+                dict_blob = payload[b_ptr:b_ptr+d_len]; b_ptr += d_len
+                lookup = [s.decode('utf-8') for s in dict_blob.split(b'\x00')]
+                indices = unpack_delta_ints(payload[b_ptr:], row_count)
+                columns_data[name] = [lookup[idx] if idx < len(lookup) else None for idx in indices]
+            elif mode == 0x08: # ISO timestamp → epoch-seconds delta
+                mask = payload[1 : 1 + row_count]; b_ptr = 1 + row_count
+                suf_len = payload[b_ptr]; b_ptr += 1
+                suffix = payload[b_ptr:b_ptr+suf_len].decode('utf-8'); b_ptr += suf_len
+                present_count = sum(mask)
+                epochs = unpack_delta_ints(payload[b_ptr:], present_count)
+                it = iter(epochs); values = []
+                for i in range(row_count):
+                    if mask[i]:
+                        ep = next(it)
+                        dt = datetime.utcfromtimestamp(ep)
+                        values.append(dt.strftime('%Y-%m-%dT%H:%M:%S') + suffix)
+                    else:
+                        values.append(None)
+                columns_data[name] = values
             elif mode == 0x06: # Numeric-suffix string
                 p_len, b_ptr = unpack_varint_buf(payload, 1)
                 prefix = payload[b_ptr:b_ptr+p_len].decode('utf-8'); b_ptr += p_len

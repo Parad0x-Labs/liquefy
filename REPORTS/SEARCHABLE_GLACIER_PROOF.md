@@ -35,7 +35,7 @@ We replaced the "guessing" heuristics with a deterministic **64KB Audition**.
 | **Search Speed** | 5.2 ms | **4.8 ms** | **1.1x FASTER** |
 | **Storage Size** | Baseline | **0.85x - 1.2x** | **Adaptive** |
 
-> **Context:** The "Search Speed" is limited by Python overhead. In a native Rust binary, the **2.4% Bytes Decoded** stat would translate to a **40x Speedup**.
+Search speed in Python is CPU-bound by the interpreter. The 2.4% bytes-decoded stat is the algorithmic win — Rust or C++ implementation translates that directly to proportional latency reduction.
 
 ## 4. Rust Core Verification
 **Status:** **COMPILED & VERIFIED**
