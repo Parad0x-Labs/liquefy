@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: liquefy
-Version: 0.2.1
+Version: 0.2.2
 Summary: Columnar compression that beats Zstd on structured data. 226x on JSON. Built-in search. MIT.
 Author-email: Parad0x Labs <labs@parad0x.io>
 License: MIT
