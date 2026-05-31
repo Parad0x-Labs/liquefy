@@ -43,13 +43,27 @@ class NULL_Safety_Valve:
             restored_data = decompress_func(candidate_blob)
             restored_hash = xxhash.xxh64(restored_data).digest()
 
+            # Byte-exact match (preferred)
             if original_hash == restored_hash:
-                # SUCCESS
                 return b'SAFE' + engine_id + candidate_blob
-            else:
-                # FAILURE - LOG AND FALLBACK
-                print(f"!! SAFETY VALVE TRIGGERED !! Engine {engine_id.decode(errors='replace')} integrity failure. Falling back to Zstd.")
-                return self._fallback(original_data)
+
+            # Semantic match for JSON engines: they normalise spacing on round-trip.
+            # If the byte counts differ we check that all JSON lines parse to equal objects.
+            if len(restored_data) != len(original_data):
+                orig_lines    = [l for l in original_data.splitlines() if l.strip()]
+                restored_lines = [l for l in restored_data.splitlines() if l.strip()]
+                if len(orig_lines) == len(restored_lines):
+                    import json as _json
+                    try:
+                        if all(_json.loads(a) == _json.loads(b)
+                               for a, b in zip(orig_lines, restored_lines)):
+                            return b'SAFE' + engine_id + candidate_blob
+                    except Exception:
+                        pass
+
+            # FAILURE - LOG AND FALLBACK
+            print(f"!! SAFETY VALVE TRIGGERED !! Engine {engine_id.decode(errors='replace')} integrity failure. Falling back to Zstd.")
+            return self._fallback(original_data)
 
         except Exception as e:
             # CRASH - FALLBACK

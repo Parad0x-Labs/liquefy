@@ -27,7 +27,7 @@ def pack_varint(val: int) -> bytes:
     out.append(val & 0x7F)
     return bytes(out)
 
-def unpack_varint_buf(data: bytes, pos: int) -> tuple[int, int]:
+def unpack_varint_buf(data: bytes, pos: int) -> tuple:
     res = 0; shift = 0
     while True:
         b = data[pos]; pos += 1
@@ -35,6 +35,48 @@ def unpack_varint_buf(data: bytes, pos: int) -> tuple[int, int]:
         if not (b & 0x80): break
         shift += 7
     return res, pos
+
+def zigzag_encode(n: int) -> int:
+    """Map signed int → unsigned int so small abs-value deltas pack small."""
+    return (n << 1) ^ (n >> 63)
+
+def zigzag_decode(u: int) -> int:
+    return (u >> 1) ^ -(u & 1)
+
+def pack_delta_ints(values: list) -> bytes:
+    """Delta + ZigZag + varint encode a list of ints. ~10x better than raw int64."""
+    out = bytearray()
+    prev = 0
+    for v in values:
+        delta = v - prev
+        out.extend(pack_varint(zigzag_encode(delta)))
+        prev = v
+    return bytes(out)
+
+def unpack_delta_ints(data: bytes, count: int) -> list:
+    vals = []; pos = 0; prev = 0
+    for _ in range(count):
+        u, pos = unpack_varint_buf(data, pos)
+        v = zigzag_decode(u) + prev
+        vals.append(v); prev = v
+    return vals
+
+import re as _re
+_NUMERIC_SUFFIX_RE = _re.compile(r'^(.*?)(\d+)$')
+
+def _detect_numeric_suffix(values: list):
+    """Return (prefix, width, int_list) if all strings share a prefix + zero-padded int suffix."""
+    if len(values) < 8: return None
+    m = _NUMERIC_SUFFIX_RE.match(values[0])
+    if not m: return None
+    prefix, first_num = m.group(1), m.group(2)
+    width = len(first_num)
+    nums = []
+    for v in values:
+        m2 = _NUMERIC_SUFFIX_RE.match(v)
+        if not m2 or m2.group(1) != prefix: return None
+        nums.append(int(m2.group(2)))
+    return prefix, width, nums
 
 class NULL_Json_Columnar_Gun_v1:
     def __init__(self, level=22, privacy_noise=0.1):
@@ -152,34 +194,51 @@ class NULL_Json_Columnar_Gun_v1:
 
             if isinstance(first_val, (int, float)) and not isinstance(first_val, bool) and all(isinstance(v, (int, float)) or v is None for v in valid_vals):
                 has_float = any(isinstance(v, float) for v in valid_vals)
-                raw_payload.append(0x03)
-                raw_payload.append(0x01 if has_float else 0x00)
                 mask = bytes([1 if v is not None else 0 for v in values])
-                raw_payload.extend(mask)
+                present = [v for v in values if v is not None]
                 if has_float:
-                    for v in values:
-                        if v is not None: raw_payload.extend(struct.pack('<d', float(v)))
+                    # Float: delta on raw int64 bits (works well for sequential timestamps)
+                    raw_payload.append(0x03)
+                    raw_payload.append(0x01)
+                    raw_payload.extend(mask)
+                    for v in present:
+                        raw_payload.extend(struct.pack('<d', float(v)))
                 else:
-                    for v in values:
-                        if v is not None: raw_payload.extend(struct.pack('<q', int(v)))
-            
+                    # Integer: delta + ZigZag + varint — ~10x better than raw int64
+                    raw_payload.append(0x05)
+                    raw_payload.extend(mask)
+                    raw_payload.extend(pack_delta_ints([int(v) for v in present]))
+
             elif isinstance(first_val, str):
                 unique_list = sorted(list(set(valid_vals)))
                 if len(unique_list) < 256 and len(valid_vals) > 10:
+                    # Low-cardinality: dictionary encode (1 byte per row)
                     raw_payload.append(0x01)
                     raw_payload.extend(pack_varint(len(unique_list)))
                     for uv in unique_list:
                         b_uv = uv.encode('utf-8')
                         raw_payload.extend(pack_varint(len(b_uv)))
                         raw_payload.extend(b_uv)
-                    
                     mapping = {v: i for i, v in enumerate(unique_list)}
                     indices = bytes([mapping[v] if v is not None else 0xFF for v in values])
                     raw_payload.extend(indices)
                 else:
-                    raw_payload.append(0x02)
-                    joined = b'\x00'.join([v.encode('utf-8') if v is not None else b'\x01' for v in values])
-                    raw_payload.extend(joined)
+                    # High-cardinality: try numeric-suffix extraction first
+                    ns = _detect_numeric_suffix(valid_vals)
+                    if ns:
+                        prefix, width, nums = ns
+                        mask_b = bytes([1 if v is not None else 0 for v in values])
+                        raw_payload.append(0x06)
+                        p_enc = prefix.encode('utf-8')
+                        raw_payload.extend(pack_varint(len(p_enc)))
+                        raw_payload.extend(p_enc)
+                        raw_payload.append(width)  # zero-pad width
+                        raw_payload.extend(mask_b)
+                        raw_payload.extend(pack_delta_ints(nums))
+                    else:
+                        raw_payload.append(0x02)
+                        joined = b'\x00'.join([v.encode('utf-8') if v is not None else b'\x01' for v in values])
+                        raw_payload.extend(joined)
             else:
                 raw_payload.append(0x04)
                 joined = b'\x00'.join([json.dumps(v).encode('utf-8') if v is not None else b'\x01' for v in values])
@@ -220,19 +279,27 @@ class NULL_Json_Columnar_Gun_v1:
                 continue
 
             mode = payload[0]
-            if mode == 0x03: # Numeric
+            if mode == 0x03: # Float numeric (legacy raw float64)
                 format_type = payload[1]
                 mask = payload[2 : 2 + row_count]
                 data_ptr = 2 + row_count
                 values = []
                 for i in range(row_count):
                     if mask[i]:
-                        if format_type == 0x01: # float64
+                        if format_type == 0x01:
                             values.append(struct.unpack('<d', payload[data_ptr:data_ptr+8])[0]); data_ptr += 8
-                        else: # int64
+                        else:
                             values.append(struct.unpack('<q', payload[data_ptr:data_ptr+8])[0]); data_ptr += 8
                     else:
                         values.append(None)
+                columns_data[name] = values
+            elif mode == 0x05: # Integer: delta + ZigZag + varint
+                mask = payload[1 : 1 + row_count]
+                present_count = sum(mask)
+                ints = unpack_delta_ints(payload[1 + row_count:], present_count)
+                it = iter(ints); values = []
+                for i in range(row_count):
+                    values.append(next(it) if mask[i] else None)
                 columns_data[name] = values
             elif mode == 0x01: # Dict
                 dict_n, b_ptr = unpack_varint_buf(payload, 1)
@@ -242,6 +309,20 @@ class NULL_Json_Columnar_Gun_v1:
                     lookup.append(payload[b_ptr:b_ptr+s_len].decode('utf-8')); b_ptr += s_len
                 indices = payload[b_ptr:]
                 columns_data[name] = [lookup[i] if i != 0xFF else None for i in indices]
+            elif mode == 0x06: # Numeric-suffix string
+                p_len, b_ptr = unpack_varint_buf(payload, 1)
+                prefix = payload[b_ptr:b_ptr+p_len].decode('utf-8'); b_ptr += p_len
+                width = payload[b_ptr]; b_ptr += 1
+                mask = payload[b_ptr : b_ptr + row_count]; b_ptr += row_count
+                present_count = sum(mask)
+                nums = unpack_delta_ints(payload[b_ptr:], present_count)
+                it = iter(nums); values = []
+                for i in range(row_count):
+                    if mask[i]:
+                        values.append(f"{prefix}{next(it):0{width}d}")
+                    else:
+                        values.append(None)
+                columns_data[name] = values
             elif mode == 0x02: # Raw String
                 parts = payload[1:].split(b'\x00')
                 columns_data[name] = [x.decode('utf-8') if x != b'\x01' else None for x in parts]

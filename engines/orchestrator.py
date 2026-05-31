@@ -8,6 +8,8 @@ FEAT:    Automatic Type Detection + Safety Valve Integration.
 
 import sys
 import os
+import json
+import re
 from pathlib import Path
 
 # Add all subdirectories to sys.path
@@ -37,19 +39,96 @@ class NULL_Orchestrator:
         # Security Layer
         self.security = NULL_Security_Layer(master_secret=security_secret)
         
-        # Load all engines (Lazy loading recommended for production)
-        # For this v1, we map IDs to modules
+        # Engine registry: key -> (module_name, class_name, protocol_id)
+        # IMPORTANT: every protocol_id must be unique — duplicate IDs cause wrong
+        # champion selection during decompress (last-write wins in registry dict).
         self.engines = {
-            # 'ID' : (Module, Name, ProtocolID)
-            'apache_entropy': ('NULL_Apache_Entropy_Focused', 'NULL_Apache_Entropy_Focused', b'LPRM'),
-            'apache_repetitive': ('NULL_Apache_Repetition_Focused', 'NULL_Apache_Repetition_Focused', b'UNI\x01'),
-            'universal_entropy': ('NULL_Universal_Entropy_Focused', 'NULL_Universal_Entropy_Focused', b'NMX5'),
-            'cloudtrail': ('NULL_Aws_CloudTrail_Entropy_Focused', 'NULL_Aws_CloudTrail_Entropy_Focused', b'CTL\x01'),
-            'json_columnar': ('NULL_Json_Columnar_Gun_v1', 'NULL_Json_Columnar_Gun_v1', b'COL1'),
-            'json_entropy': ('NULL_Json_Entropy_Focused', 'NULL_Json_Entropy_Focused', b'COL1'),
-            # ... and so on for all 21 champions
+            # JSON / structured
+            'json_columnar':     ('NULL_Json_Columnar_Gun_v1',          'NULL_Json_Columnar_Gun_v1',          b'COL2'),
+            'json_entropy':      ('NULL_Json_Entropy_Focused',           'NULL_Json_Entropy_Focused',           b'JEN1'),
+            'json_repetitive':   ('NULL_Json_Repetition_Focused',        'NULL_Json_Repetition_Focused',        b'JRP1'),
+            # Nginx
+            'nginx_entropy':     ('NULL_Nginx_Entropy_Focused',          'NULL_Nginx_Entropy_Focused',          b'NGX1'),
+            'nginx_repetitive':  ('NULL_Nginx_Repetition_Focused',       'NULL_Nginx_Repetition_Focused',       b'NGX2'),
+            # Apache
+            'apache_entropy':    ('NULL_Apache_Entropy_Focused',         'NULL_Apache_Entropy_Focused',         b'APH1'),
+            'apache_repetitive': ('NULL_Apache_Repetition_Focused',      'NULL_Apache_Repetition_Focused',      b'APH2'),
+            # Syslog
+            'syslog_entropy':    ('NULL_Syslog_Entropy_Focused',         'NULL_Syslog_Entropy_Focused',         b'SLG1'),
+            'syslog_repetitive': ('NULL_Syslog_Repetition_Focused',      'NULL_Syslog_Repetition_Focused',      b'SLG2'),
+            # K8s
+            'k8s_entropy':       ('NULL_K8s_Entropy_Focused',            'NULL_K8s_Entropy_Focused',            b'K8S1'),
+            'k8s_velocity':      ('NULL_K8s_Native_Velocity',            'NULL_K8s_Native_Velocity',            b'K8S2'),
+            # SQL / Postgres
+            'sql_entropy':       ('NULL_Sql_Entropy_Focused',            'NULL_Sql_Entropy_Focused',            b'SQL1'),
+            'sql_repetitive':    ('NULL_Sql_Repetition_Focused',         'NULL_Sql_Repetition_Focused',         b'SQL2'),
+            'sql_velocity':      ('NULL_Sql_Native_Velocity',            'NULL_Sql_Native_Velocity',            b'SQL3'),
+            # AWS
+            'cloudtrail':        ('NULL_Aws_CloudTrail_Entropy_Focused', 'NULL_Aws_CloudTrail_Entropy_Focused', b'CTL1'),
+            'vpcflow':           ('NULL_Aws_VpcFlow_Entropy_Focused',    'NULL_Aws_VpcFlow_Entropy_Focused',    b'VPC1'),
+            # Other
+            'netflow':           ('NULL_Netflow_V5_Entropy_Focused',     'NULL_Netflow_V5_Entropy_Focused',     b'NFW1'),
+            'vmware':            ('NULL_Vmware_Entropy_Focused',         'NULL_Vmware_Entropy_Focused',         b'VMW1'),
+            'windows_evtx':      ('NULL_Windows_Evtx_Entropy_Focused',   'NULL_Windows_Evtx_Entropy_Focused',   b'EVT1'),
+            'github_scm':        ('NULL_Scm_GitHub_Entropy_Focused',     'NULL_Scm_GitHub_Entropy_Focused',     b'SCM1'),
+            # Universal fallback
+            'universal_entropy': ('NULL_Universal_Entropy_Focused',      'NULL_Universal_Entropy_Focused',      b'UNV1'),
+            'universal_rep':     ('NULL_Universal_Repetition_Focused',   'NULL_Universal_Repetition_Focused',   b'UNV2'),
         }
-        self.registry = {} # ID -> Decompress Func
+        self.registry = {}  # protocol_id -> decompress_func
+
+    # ── Format auto-detection ────────────────────────────────────────────────
+
+    _IP_RE  = re.compile(rb'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
+    _SYS_RE = re.compile(rb'^[A-Z][a-z]{2}\s+\d')
+    _K8S_KW = {b'"stream"', b'"pod"', b'"namespace"', b'"container"'}
+    _SQL_KW = {b'"duration_ms"', b'"query"', b'SELECT ', b'INSERT ', b'UPDATE '}
+    _AWS_KW = {b'"eventName"', b'"awsRegion"', b'"userAgent"', b'"eventVersion"'}
+    _VPC_KW = {b'"srcAddr"', b'"dstAddr"', b'"srcPort"'}
+
+    def detect_engine(self, data: bytes) -> str:
+        """Sniff 4KB sample and return the best engine key."""
+        sample = data[:4096]
+        lines  = [l.strip() for l in sample.splitlines() if l.strip()]
+        if not lines:
+            return 'universal_entropy'
+        first = lines[0]
+
+        # AWS CloudTrail / VPC Flow (check before generic JSON)
+        if any(kw in sample for kw in self._AWS_KW):
+            return 'cloudtrail'
+        if any(kw in sample for kw in self._VPC_KW):
+            return 'vpcflow'
+
+        # K8s JSON
+        if any(kw in sample for kw in self._K8S_KW):
+            return 'k8s_entropy'
+
+        # SQL / Postgres
+        if any(kw in sample for kw in self._SQL_KW):
+            return 'sql_entropy'
+
+        # Generic JSON (try parse first line)
+        try:
+            obj = json.loads(first)
+            if isinstance(obj, dict):
+                return 'json_columnar'
+        except Exception:
+            pass
+
+        # Nginx / Apache access logs (start with IP)
+        if self._IP_RE.match(first):
+            return 'nginx_entropy' if b'"nginx' in sample or b'nginx' in sample.lower() else 'apache_entropy'
+
+        # Syslog (RFC 3164: "Jan  1 00:00:00 hostname proc[pid]: msg")
+        if self._SYS_RE.match(first):
+            return 'syslog_entropy'
+
+        # GitHub SCM
+        if b'"repo"' in sample and b'"actor"' in sample:
+            return 'github_scm'
+
+        return 'universal_entropy'
 
     def get_nulla(self):
         """Get the NULL AI agent for deployment coordination"""
@@ -63,15 +142,18 @@ class NULL_Orchestrator:
         self.registry[proto_id] = engine.decompress
         return engine, proto_id
 
-    def compress(self, data: bytes, engine_key: str, tenant_id: str = "default") -> bytes:
+    def compress(self, data: bytes, engine_key: str = None, tenant_id: str = "default") -> bytes:
         """
         Full Pipeline:
-        1. Select Engine
+        1. Auto-detect format (if engine_key is None)
         2. Safe Seal (Compression + MRTV Verification)
         3. Secure Seal (Encryption + Tenant Isolation + Audit Trail)
         """
         import time
         start_time = time.time()
+
+        if engine_key is None:
+            engine_key = self.detect_engine(data)
 
         engine, proto_id = self._get_engine(engine_key)
 
