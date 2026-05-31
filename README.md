@@ -17,7 +17,7 @@
 flowchart LR
     A([🤖 1,000,000\nreceipts / day]) --> B[Net bilateral flows]
     B --> C([📉 ~4,950\nnet settlements])
-    C --> D[Columnar Gun v1\n62× compression]
+    C --> D[Columnar Gun v1\n80-150× compression]
     D --> E([📦 ~2.6 MB\ncompressed])
     E --> F[AES-256-GCM\nencryption]
     F --> G([🔒 private\nbatch])
@@ -129,12 +129,12 @@ Repeated values compress to a single dictionary entry. Sequential numbers compre
 
 Liquefy's columnar algorithm is used in [**DNA x402**](https://github.com/Parad0x-Labs/dna-x402) to compress AI agent payment receipt batches before on-chain anchoring.
 
-x402 receipts are structured JSON with highly repetitive fields — same receiver, same program ID, sequential timestamps. The TypeScript port of Columnar Gun achieves **62× compression** on real batches:
+x402 receipts are structured JSON with highly repetitive fields — same receiver, same program ID, sequential timestamps. The TypeScript port of Columnar Gun achieves **80–150× compression** on real batches (random Solana tx signatures limit the ceiling; synthetic sequential IDs compress much higher):
 
 ```
 500 payment receipts  →  163 KB raw JSON
                       →  net bilateral flows  (500 receipts → 2 net settlements)
-                      →  2.6 KB compressed    (62× columnar)
+                      →  ~1–2 KB compressed   (80–150× columnar)
                       →  AES-256-GCM encrypted
                       →  1 on-chain tx        (not 500)
 ```
