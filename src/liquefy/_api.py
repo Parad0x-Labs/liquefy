@@ -39,6 +39,30 @@ from security_compliance import NULL_Security_Layer  # type: ignore
 _ENGINE = _ColGun(level=22)
 
 
+def compress_records(records: list) -> bytes:
+    """
+    Compress a list of dicts (agent logs, receipts, tool calls, etc).
+    This is the primary handoff point — pass any structured records,
+    get back compressed bytes ready for encryption / Arweave / anchoring.
+
+    Args:
+        records: List of dicts. All dicts should share the same schema
+                 for best compression (agent logs, receipts, spans, etc).
+
+    Returns:
+        Compressed bytes. Pass directly to encrypt(), upload to Arweave,
+        or anchor the sha256() as a Solana commitment.
+
+    Example:
+        from liquefy import compress_records
+        blob = compress_records(receipts)          # receipts: list[dict]
+        commitment = hashlib.sha256(blob).digest() # 32-byte anchor
+    """
+    import json as _json
+    lines = "\n".join(_json.dumps(r, separators=(",", ":")) for r in records)
+    return _ENGINE.compress(lines.encode("utf-8"))
+
+
 def compress(data: bytes | str) -> bytes:
     """
     Compress structured JSON/JSONL bytes using Liquefy Columnar Gun v1.

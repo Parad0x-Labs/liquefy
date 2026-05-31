@@ -1,0 +1,188 @@
+{
+  "JSON output (clustered)": {
+    "compression": [
+      {
+        "name": "a. raw-int32 -> zstd",
+        "orig_kb": 625.0,
+        "comp_kb": 211.4,
+        "ratio": 2.96,
+        "compress_ms": 31.67,
+        "decompress_ms": 2.95,
+        "compress_MB/s": 19.3,
+        "decompress_MB/s": 206.9
+      },
+      {
+        "name": "b. delta-int32 -> zstd",
+        "orig_kb": 625.0,
+        "comp_kb": 272.2,
+        "ratio": 2.3,
+        "compress_ms": 44.36,
+        "decompress_ms": 2.58,
+        "compress_MB/s": 13.8,
+        "decompress_MB/s": 236.8
+      },
+      {
+        "name": "c. columnar-pos -> Liquefy",
+        "orig_kb": 1356.9,
+        "comp_kb": 223.5,
+        "ratio": 6.07,
+        "compress_ms": 264.15,
+        "decompress_ms": 147.07,
+        "compress_MB/s": 5.0,
+        "decompress_MB/s": 9.0
+      },
+      {
+        "name": "d. NDJSON row -> zstd (baseline)",
+        "orig_kb": 1356.9,
+        "comp_kb": 313.4,
+        "ratio": 4.33,
+        "compress_ms": 42.81,
+        "decompress_ms": 3.55,
+        "compress_MB/s": 31.0,
+        "decompress_MB/s": 373.7
+      }
+    ],
+    "grep": {
+      "target_token": 1234,
+      "position": 3,
+      "ground_truth": 50,
+      "found": 56,
+      "true_positive": 50,
+      "false_positive": 6,
+      "false_negative": 0,
+      "exact_match": false,
+      "grep_ms": 49.72,
+      "stats": {
+        "duration_ms": 48.53979998733848,
+        "total_archive_bytes": 228795,
+        "bytes_decoded": 480032,
+        "candidate_cols": 16,
+        "total_cols": 16
+      }
+    }
+  },
+  "Free text (random)": {
+    "compression": [
+      {
+        "name": "a. raw-int32 -> zstd",
+        "orig_kb": 625.0,
+        "comp_kb": 405.5,
+        "ratio": 1.54,
+        "compress_ms": 34.58,
+        "decompress_ms": 3.05,
+        "compress_MB/s": 17.7,
+        "decompress_MB/s": 200.3
+      },
+      {
+        "name": "b. delta-int32 -> zstd",
+        "orig_kb": 625.0,
+        "comp_kb": 434.4,
+        "ratio": 1.44,
+        "compress_ms": 31.55,
+        "decompress_ms": 2.25,
+        "compress_MB/s": 19.3,
+        "decompress_MB/s": 270.9
+      },
+      {
+        "name": "c. columnar-pos -> Liquefy",
+        "orig_kb": 1780.0,
+        "comp_kb": 440.7,
+        "ratio": 4.04,
+        "compress_ms": 408.03,
+        "decompress_ms": 220.65,
+        "compress_MB/s": 4.3,
+        "decompress_MB/s": 7.9
+      },
+      {
+        "name": "d. NDJSON row -> zstd (baseline)",
+        "orig_kb": 1780.0,
+        "comp_kb": 609.5,
+        "ratio": 2.92,
+        "compress_ms": 136.54,
+        "decompress_ms": 15.87,
+        "compress_MB/s": 12.7,
+        "decompress_MB/s": 109.5
+      }
+    ],
+    "grep": {
+      "target_token": 1234,
+      "position": 3,
+      "ground_truth": 50,
+      "found": 51,
+      "true_positive": 50,
+      "false_positive": 1,
+      "false_negative": 0,
+      "exact_match": false,
+      "grep_ms": 59.32,
+      "stats": {
+        "duration_ms": 59.16889995569363,
+        "total_archive_bytes": 451170,
+        "bytes_decoded": 800032,
+        "candidate_cols": 16,
+        "total_cols": 16
+      }
+    }
+  },
+  "Code output (repetitive)": {
+    "compression": [
+      {
+        "name": "a. raw-int32 -> zstd",
+        "orig_kb": 625.0,
+        "comp_kb": 233.1,
+        "ratio": 2.68,
+        "compress_ms": 35.57,
+        "decompress_ms": 2.16,
+        "compress_MB/s": 17.2,
+        "decompress_MB/s": 282.5
+      },
+      {
+        "name": "b. delta-int32 -> zstd",
+        "orig_kb": 625.0,
+        "comp_kb": 316.7,
+        "ratio": 1.97,
+        "compress_ms": 29.21,
+        "decompress_ms": 2.22,
+        "compress_MB/s": 20.9,
+        "decompress_MB/s": 274.9
+      },
+      {
+        "name": "c. columnar-pos -> Liquefy",
+        "orig_kb": 1624.1,
+        "comp_kb": 312.6,
+        "ratio": 5.2,
+        "compress_ms": 326.39,
+        "decompress_ms": 139.72,
+        "compress_MB/s": 4.9,
+        "decompress_MB/s": 11.4
+      },
+      {
+        "name": "d. NDJSON row -> zstd (baseline)",
+        "orig_kb": 1624.1,
+        "comp_kb": 380.7,
+        "ratio": 4.27,
+        "compress_ms": 57.71,
+        "decompress_ms": 6.19,
+        "compress_MB/s": 27.5,
+        "decompress_MB/s": 256.3
+      }
+    ],
+    "grep": {
+      "target_token": 1234,
+      "position": 3,
+      "ground_truth": 50,
+      "found": 54,
+      "true_positive": 50,
+      "false_positive": 4,
+      "false_negative": 0,
+      "exact_match": false,
+      "grep_ms": 80.84,
+      "stats": {
+        "duration_ms": 80.30169998528436,
+        "total_archive_bytes": 320057,
+        "bytes_decoded": 780032,
+        "candidate_cols": 16,
+        "total_cols": 16
+      }
+    }
+  }
+}

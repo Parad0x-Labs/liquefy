@@ -12,7 +12,7 @@ For AI agent payment receipt batching (Solana x402):
     See https://github.com/Parad0x-Labs/dna-x402 → packages/liquefy-receipts/
 """
 
-from liquefy._api import compress, decompress, search, compress_encrypted, decompress_encrypted
+from liquefy._api import compress, compress_records, decompress, search, compress_encrypted, decompress_encrypted
 
-__version__ = "0.1.0"
-__all__ = ["compress", "decompress", "search", "compress_encrypted", "decompress_encrypted"]
+__version__ = "0.2.2"
+__all__ = ["compress", "compress_records", "decompress", "search", "compress_encrypted", "decompress_encrypted"]

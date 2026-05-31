@@ -1,0 +1,228 @@
+{
+  "structured_json (16 tok)": {
+    "compression": [
+      {
+        "name": "a. raw int32 -> zstd",
+        "orig_kb": 62.5,
+        "comp_kb": 26.7,
+        "ratio": 2.34,
+        "cmp_ms": 1.27,
+        "dcp_ms": 0.15,
+        "cmp_mbs": 47.9,
+        "dcp_mbs": 408.1
+      },
+      {
+        "name": "b. delta int32 -> zstd",
+        "orig_kb": 62.5,
+        "comp_kb": 44.5,
+        "ratio": 1.4,
+        "cmp_ms": 1.27,
+        "dcp_ms": 0.1,
+        "cmp_mbs": 48.2,
+        "dcp_mbs": 622.9
+      },
+      {
+        "name": "c. Liquefy columnar",
+        "orig_kb": 158.8,
+        "comp_kb": 28.4,
+        "ratio": 5.59,
+        "cmp_ms": 15.06,
+        "dcp_ms": 8.88,
+        "cmp_mbs": 10.3,
+        "dcp_mbs": 17.5
+      },
+      {
+        "name": "d. NDJSON -> zstd (baseline)",
+        "orig_kb": 158.8,
+        "comp_kb": 35.4,
+        "ratio": 4.49,
+        "cmp_ms": 4.65,
+        "dcp_ms": 0.3,
+        "cmp_mbs": 33.3,
+        "dcp_mbs": 518.4
+      }
+    ],
+    "grep": {
+      "ground_truth": 51,
+      "found": 51,
+      "tp": 51,
+      "fp": 0,
+      "fn": 0,
+      "exact": true,
+      "grep_ms": 0.42,
+      "bytes_decomp": 675,
+      "archive_bytes": 29062,
+      "pct_decoded": 2.32
+    }
+  },
+  "structured_json (ragged)": {
+    "compression": [
+      {
+        "name": "a. raw int32 -> zstd",
+        "orig_kb": 140.1,
+        "comp_kb": 58.4,
+        "ratio": 2.4,
+        "cmp_ms": 3.21,
+        "dcp_ms": 0.49,
+        "cmp_mbs": 42.6,
+        "dcp_mbs": 278.8
+      },
+      {
+        "name": "b. delta int32 -> zstd",
+        "orig_kb": 140.1,
+        "comp_kb": 97.6,
+        "ratio": 1.43,
+        "cmp_ms": 4.91,
+        "dcp_ms": 0.28,
+        "cmp_mbs": 27.9,
+        "dcp_mbs": 486.4
+      },
+      {
+        "name": "c. Liquefy columnar",
+        "orig_kb": 618.2,
+        "comp_kb": 87.7,
+        "ratio": 7.05,
+        "cmp_ms": 92.8,
+        "dcp_ms": 35.65,
+        "cmp_mbs": 6.5,
+        "dcp_mbs": 16.9
+      },
+      {
+        "name": "d. NDJSON -> zstd (baseline)",
+        "orig_kb": 618.2,
+        "comp_kb": 94.2,
+        "ratio": 6.56,
+        "cmp_ms": 8.98,
+        "dcp_ms": 1.02,
+        "cmp_mbs": 67.2,
+        "dcp_mbs": 592.6
+      }
+    ],
+    "grep": {
+      "ground_truth": 50,
+      "found": 50,
+      "tp": 50,
+      "fp": 0,
+      "fn": 0,
+      "exact": true,
+      "grep_ms": 0.51,
+      "bytes_decomp": 702,
+      "archive_bytes": 89809,
+      "pct_decoded": 0.78
+    },
+    "avg_len": 35.867,
+    "pad_width": 64
+  },
+  "chain_of_thought (32 tok)": {
+    "compression": [
+      {
+        "name": "a. raw int32 -> zstd",
+        "orig_kb": 125.0,
+        "comp_kb": 63.4,
+        "ratio": 1.97,
+        "cmp_ms": 2.76,
+        "dcp_ms": 0.35,
+        "cmp_mbs": 44.2,
+        "dcp_mbs": 344.5
+      },
+      {
+        "name": "b. delta int32 -> zstd",
+        "orig_kb": 125.0,
+        "comp_kb": 78.9,
+        "ratio": 1.58,
+        "cmp_ms": 2.93,
+        "dcp_ms": 0.28,
+        "cmp_mbs": 41.7,
+        "dcp_mbs": 437.3
+      },
+      {
+        "name": "c. Liquefy columnar",
+        "orig_kb": 346.5,
+        "comp_kb": 79.4,
+        "ratio": 4.36,
+        "cmp_ms": 41.04,
+        "dcp_ms": 19.69,
+        "cmp_mbs": 8.2,
+        "dcp_mbs": 17.2
+      },
+      {
+        "name": "d. NDJSON -> zstd (baseline)",
+        "orig_kb": 346.5,
+        "comp_kb": 100.1,
+        "ratio": 3.46,
+        "cmp_ms": 9.9,
+        "dcp_ms": 0.7,
+        "cmp_mbs": 34.2,
+        "dcp_mbs": 484.4
+      }
+    ],
+    "grep": {
+      "ground_truth": 50,
+      "found": 50,
+      "tp": 50,
+      "fp": 0,
+      "fn": 0,
+      "exact": true,
+      "grep_ms": 0.75,
+      "bytes_decomp": 36,
+      "archive_bytes": 81324,
+      "pct_decoded": 0.04
+    }
+  },
+  "free_text (16 tok, random)": {
+    "compression": [
+      {
+        "name": "a. raw int32 -> zstd",
+        "orig_kb": 62.5,
+        "comp_kb": 41.9,
+        "ratio": 1.49,
+        "cmp_ms": 2.06,
+        "dcp_ms": 0.14,
+        "cmp_mbs": 29.7,
+        "dcp_mbs": 425.9
+      },
+      {
+        "name": "b. delta int32 -> zstd",
+        "orig_kb": 62.5,
+        "comp_kb": 44.0,
+        "ratio": 1.42,
+        "cmp_ms": 2.07,
+        "dcp_ms": 0.2,
+        "cmp_mbs": 29.5,
+        "dcp_mbs": 299.9
+      },
+      {
+        "name": "c. Liquefy columnar",
+        "orig_kb": 178.1,
+        "comp_kb": 45.1,
+        "ratio": 3.94,
+        "cmp_ms": 28.12,
+        "dcp_ms": 20.39,
+        "cmp_mbs": 6.2,
+        "dcp_mbs": 8.5
+      },
+      {
+        "name": "d. NDJSON -> zstd (baseline)",
+        "orig_kb": 178.1,
+        "comp_kb": 61.3,
+        "ratio": 2.91,
+        "cmp_ms": 6.92,
+        "dcp_ms": 0.89,
+        "cmp_mbs": 25.1,
+        "dcp_mbs": 195.1
+      }
+    ],
+    "grep": {
+      "ground_truth": 50,
+      "found": 50,
+      "tp": 50,
+      "fp": 0,
+      "fn": 0,
+      "exact": true,
+      "grep_ms": 0.52,
+      "bytes_decomp": 2738,
+      "archive_bytes": 46091,
+      "pct_decoded": 5.94
+    }
+  }
+}
