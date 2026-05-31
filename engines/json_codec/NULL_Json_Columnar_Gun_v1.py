@@ -8,13 +8,30 @@ STATUS: Production Grade - Bit-Perfect.
 """
 
 import sys
-import json
 import struct
 import zstandard as zstd
 import random
 import time
 from collections import defaultdict
-from typing import List, Dict, Any, Tuple
+
+# orjson is 5-10x faster than stdlib json — use it when available
+try:
+    import orjson as json
+    _JSON_LOADS  = json.loads
+    _JSON_DUMPS  = lambda obj: json.dumps(obj).decode()
+    _JSON_DUMPB  = json.dumps   # returns bytes directly
+except ImportError:
+    import json as json
+    _JSON_LOADS  = json.loads
+    _JSON_DUMPS  = lambda obj: json.dumps(obj, separators=(',', ':'))
+    _JSON_DUMPB  = lambda obj: json.dumps(obj, separators=(',', ':')).encode()
+
+# numpy for vectorized delta encode/decode — falls back to pure Python
+try:
+    import numpy as np
+    _HAS_NUMPY = True
+except ImportError:
+    _HAS_NUMPY = False
 
 PROTOCOL_ID = b'COL2' # Upgraded to v2 for Privacy Header
 
@@ -44,9 +61,22 @@ def zigzag_decode(u: int) -> int:
     return (u >> 1) ^ -(u & 1)
 
 def pack_delta_ints(values: list) -> bytes:
-    """Delta + ZigZag + varint encode a list of ints. ~10x better than raw int64."""
-    out = bytearray()
-    prev = 0
+    """Delta + ZigZag + varint encode. Uses numpy for the vectorised parts when available."""
+    if _HAS_NUMPY and len(values) > 64:
+        arr   = np.array(values, dtype=np.int64)
+        delta = np.empty_like(arr); delta[0] = arr[0]; delta[1:] = np.diff(arr)
+        zz    = np.where(delta >= 0, delta << 1, ((-delta - 1) << 1) | 1).astype(np.uint64)
+        # varint still needs a Python loop (variable width), but numpy avoids
+        # the per-element Python int arithmetic that dominated before
+        out = bytearray()
+        for u in zz.tolist():
+            while u > 0x7F:
+                out.append((u & 0x7F) | 0x80)
+                u >>= 7
+            out.append(u)
+        return bytes(out)
+    # Pure-Python fallback (small arrays or no numpy)
+    out = bytearray(); prev = 0
     for v in values:
         delta = v - prev
         out.extend(pack_varint(zigzag_encode(delta)))
@@ -54,6 +84,7 @@ def pack_delta_ints(values: list) -> bytes:
     return bytes(out)
 
 def unpack_delta_ints(data: bytes, count: int) -> list:
+    """Decode delta+ZigZag+varint sequence. Returns a plain Python list."""
     vals = []; pos = 0; prev = 0
     for _ in range(count):
         u, pos = unpack_varint_buf(data, pos)
@@ -75,11 +106,36 @@ def _detect_numeric_suffix(values: list):
     if not m: return None
     prefix, first_num = m.group(1), m.group(2)
     width = len(first_num)
+    plen  = len(prefix)
+
+    # Fast-reject: probe first/mid/last before scanning everything
+    for probe in (values[len(values)//2], values[-1]):
+        if not probe.startswith(prefix): return None
+        suf = probe[plen:]
+        if not suf.isdigit(): return None
+
+    # If all unique values == all values (truly sequential column), skip full scan.
+    # Check that last suffix == first suffix + len(values) - 1 as a shortcut.
+    last_suf = values[-1][plen:]
+    if last_suf.isdigit():
+        first_int = int(first_num); last_int = int(last_suf)
+        expected_delta = last_int - first_int
+        if 0 <= expected_delta < len(values) * 2:
+            # Likely sequential — trust the fast-reject and build nums directly
+            nums = []
+            for v in values:
+                suf = v[plen:]
+                if not suf.isdigit(): return None
+                nums.append(int(suf))
+            return prefix, width, nums
+
+    # Full scan for non-sequential patterns
     nums = []
     for v in values:
-        m2 = _NUMERIC_SUFFIX_RE.match(v)
-        if not m2 or m2.group(1) != prefix: return None
-        nums.append(int(m2.group(2)))
+        if not v.startswith(prefix): return None
+        suf = v[plen:]
+        if not suf.isdigit(): return None
+        nums.append(int(suf))
     return prefix, width, nums
 
 def _detect_iso_timestamps(values: list):
@@ -128,7 +184,7 @@ class NULL_Json_Columnar_Gun_v1:
         for line in raw_data.splitlines():
             if not line.strip(): continue
             try:
-                doc = json.loads(line)
+                doc = _JSON_LOADS(line)
                 rows.append(doc)
                 for k in doc.keys():
                     if k not in all_keys_ordered:
@@ -166,7 +222,7 @@ class NULL_Json_Columnar_Gun_v1:
         output_buffer.append(0x01 if has_trailing_newline else 0x00)
         
         # Store global key order
-        order_json = json.dumps(all_keys_ordered).encode('utf-8')
+        order_json = _JSON_DUMPB(all_keys_ordered)
         output_buffer.extend(struct.pack('<I', len(order_json)))
         output_buffer.extend(order_json)
         
@@ -182,7 +238,7 @@ class NULL_Json_Columnar_Gun_v1:
                     p_min = str(p_min)[:4]
                     p_max = str(p_max)[:4] + "~"
                 privacy_header[k] = {"min": p_min, "max": p_max, "type": zm["type"]}
-            header_compressed = self.cctx.compress(json.dumps(privacy_header).encode('utf-8'))
+            header_compressed = self.cctx.compress(_JSON_DUMPB(privacy_header))
         else:
             header_compressed = b''
         output_buffer.extend(struct.pack('<I', len(header_compressed)))
@@ -308,7 +364,7 @@ class NULL_Json_Columnar_Gun_v1:
         has_trailing_newline = blob[ptr] == 0x01; ptr += 1
         
         order_len = struct.unpack('<I', blob[ptr:ptr+4])[0]; ptr += 4
-        key_order = json.loads(blob[ptr:ptr+order_len].decode('utf-8')); ptr += order_len
+        key_order = _JSON_LOADS(blob[ptr:ptr+order_len]); ptr += order_len
 
         # SKIP PRIVACY HEADER
         p_len = struct.unpack('<I', blob[ptr:ptr+4])[0]; ptr += 4
@@ -417,7 +473,7 @@ class NULL_Json_Columnar_Gun_v1:
                 val = columns_data[name][i]
                 if val is not None:
                     row[name] = val
-            rows.append(json.dumps(row, separators=(',', ':')).encode('utf-8'))
+            rows.append(_JSON_DUMPB(row))
             
         res = b'\n'.join(rows)
         if has_trailing_newline:
@@ -455,7 +511,7 @@ class NULL_Json_Columnar_Gun_v1:
         if p_len > 0:
             privacy_data = self.dctx.decompress(blob[ptr:ptr+p_len])
             bytes_decoded += len(privacy_data)
-            privacy_header = json.loads(privacy_data)
+            privacy_header = _JSON_LOADS(privacy_data)
         ptr += p_len
         
         matching_rows = set()
