@@ -11,6 +11,17 @@
 
 ---
 
+## 💸 Why people use it
+
+Data storage is a bill that grows forever. Liquefy shrinks it — and the savings are real and reproducible:
+
+- 💾 **Pay less to store logs and receipts** — 33–61× smaller on structured JSON means a fraction of the storage cost.
+- 🔍 **Search without unzipping** — find a record 5–61× faster than Zstd, with no full decompress.
+- 🔒 **Keep it private** — AES-256-GCM built in.
+- 🆓 **Free and MIT** — self-host, no license, no lock-in.
+
+Run `python tools/benchmark.py` on your own data and see the number. *(Savings depend on how repetitive your data is.)*
+
 ### How this fits the Parad0x stack
 
 Parad0x Labs builds Web0 on Solana — money and agents that settle themselves. **You are here: 🗜️ Data.**
