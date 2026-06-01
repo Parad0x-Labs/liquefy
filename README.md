@@ -285,3 +285,7 @@ Liquefy is a structured-data compression library with properties relevant to LLM
 ---
 
 © 2026 [Parad0x Labs](https://github.com/Parad0x-Labs) — MIT
+
+<p align="center">
+  <img src="./docs/assets/github-footer-parad0xlabs.png" alt="NULL - Parad0xLabs open source systems" width="100%" />
+</p>
