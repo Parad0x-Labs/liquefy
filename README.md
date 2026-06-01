@@ -9,6 +9,10 @@
 ![vs Zstd: +50%](https://img.shields.io/badge/vs_Zstd-+50%25_on_structured_data-00ff41?style=flat-square)
 ![Restoration: Bit-Perfect](https://img.shields.io/badge/Restoration-Bit--Perfect-white?style=flat-square)
 
+<p align="center">
+  <img src="./docs/assets/github-header-liquefy.png" alt="Parad0x Labs" width="100%" />
+</p>
+
 ---
 
 ## 💸 Why people use it
@@ -291,5 +295,9 @@ Liquefy is a structured-data compression library with properties relevant to LLM
 - **Used in production** for Solana x402 AI agent payment settlement — [dna-x402](https://github.com/Parad0x-Labs/dna-x402).
 
 ---
+
+<p align="center">
+  <img src="./docs/assets/github-footer-parad0xlabs.png" alt="NULL — Parad0x Labs open source systems" width="100%" />
+</p>
 
 © 2026 [Parad0x Labs](https://github.com/Parad0x-Labs) — MIT
