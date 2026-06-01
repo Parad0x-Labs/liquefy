@@ -150,7 +150,7 @@ def compress_encrypted(data: bytes | str, key: bytes) -> bytes:
         data = data.encode("utf-8")
     compressed = compress(data)
     layer = NULL_Security_Layer(encryption_key=key)
-    return layer.encrypt(compressed)
+    return layer.seal(compressed)
 
 
 def decompress_encrypted(blob: bytes, key: bytes) -> bytes:
@@ -165,5 +165,5 @@ def decompress_encrypted(blob: bytes, key: bytes) -> bytes:
         Original bytes.
     """
     layer = NULL_Security_Layer(encryption_key=key)
-    compressed = layer.decrypt(blob)
+    compressed = layer.unseal(blob)
     return decompress(compressed)
