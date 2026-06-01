@@ -1,5 +1,9 @@
 # Liquefy
 
+**Think ZIP files — but the compression is 83× better, you can search inside without unzipping, and every archive has a cryptographic proof attached.**
+
+You feed it a million records. It shrinks them to almost nothing, encrypts them, and gives you a 32-byte fingerprint you can anchor on Solana forever. Any file you get back is bit-perfect — provably unchanged since the moment it was compressed.
+
 **Columnar compression that beats Zstd on structured data. Built-in search. Built-in encryption. MIT.**
 
 [![PyPI](https://img.shields.io/pypi/v/liquefy?style=flat-square&color=00ff41)](https://pypi.org/project/liquefy/)
