@@ -28,14 +28,17 @@ Run `python tools/benchmark.py` on your own data and see the number. *(Savings d
 
 ### How this fits the Parad0x stack
 
-Parad0x Labs builds Web0 on Solana — money and agents that settle themselves. **You are here: 🗜️ Data.**
+Parad0x Labs builds Web0 on Solana — money and agents that settle themselves. **You are here: 🗜️ Data (the compression engine the 🛡️ Audit and 🎬 Media layers are built on).**
+
+<!-- Canonical stack table — keep in sync with docs/STACK.md. Only the "You are here" line above changes per repo. -->
 
 | Layer | Repo | Does |
 |---|---|---|
 | 💸 Payments | [dna-x402](https://github.com/Parad0x-Labs/dna-x402) | x402 rail: quote → pay → verify → receipt → anchor |
 | 🛠️ Build | [dna-x402-builders](https://github.com/Parad0x-Labs/dna-x402-builders) | Hosted kit: turn any API/bot into a paid agent |
 | 🕶️ Privacy | [Dark-Null-Protocol](https://github.com/Parad0x-Labs/Dark-Null-Protocol) | Groth16 privacy settlement, published proofs |
-| 🗜️ Data | **liquefy** (this repo) | Columnar compression that beats Zstd + audit trails |
+| 🗜️ Data | **liquefy** (this repo) | Columnar compression that beats Zstd |
+| 🛡️ Audit | [liquefy-openclaw-integration](https://github.com/Parad0x-Labs/liquefy-openclaw-integration) | Flight recorder: 24 engines + Solana-anchored audit trails |
 | 🎬 Media | [nebula-media](https://github.com/Parad0x-Labs/nebula-media) | Proof-carrying media compression — scene-aware + on-chain receipts |
 | 🧠 Local AI | [nulla-local](https://github.com/Parad0x-Labs/nulla-local) | Local-first agent runtime — your machine, your memory |
 
