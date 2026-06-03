@@ -392,7 +392,9 @@ class NULL_Json_Columnar_Gun_v1:
                     raw_payload.extend(joined)
             else:
                 raw_payload.append(0x04)
-                joined = b'\x00'.join([json.dumps(v).encode('utf-8') if v is not None else b'\x01' for v in values])
+                # Backend-safe serialize: orjson.dumps already returns bytes, stdlib returns str.
+                # _JSON_DUMPB normalizes both to bytes (raw json.dumps(...).encode() crashes under orjson).
+                joined = b'\x00'.join([_JSON_DUMPB(v) if v is not None else b'\x01' for v in values])
                 raw_payload.extend(joined)
 
             col_names_b.append(col_name_bytes)
