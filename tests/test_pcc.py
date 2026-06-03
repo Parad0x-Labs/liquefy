@@ -5,7 +5,11 @@ Runs under pytest, or standalone: `PYTHONPATH=src python tests/test_pcc.py`.
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+# Pin THIS repo first: src/ for `liquefy`, repo root for `engines` — so a stray
+# pip -e install elsewhere can't shadow the code under test.
+_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(_ROOT, "src"))
+sys.path.insert(0, _ROOT)
 
 from liquefy.pcc import (  # noqa: E402
     commit_records,

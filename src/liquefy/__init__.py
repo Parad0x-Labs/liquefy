@@ -12,7 +12,11 @@ For AI agent payment receipt batching (Solana x402):
     See https://github.com/Parad0x-Labs/dna-x402 → packages/liquefy-receipts/
 """
 
-from liquefy._api import compress, compress_records, decompress, search, compress_encrypted, decompress_encrypted
+from liquefy._api import (
+    compress, compress_records, decompress, search,
+    compress_encrypted, decompress_encrypted,
+    AuditChain, secure_audit_log,
+)
 
 # Per-Column Commitment — keystone of the Verifiable Evidence Layer.
 # Pin every column under one 32-byte root; prove/disclose a single column
@@ -33,4 +37,5 @@ __all__ = [
     "compress_encrypted", "decompress_encrypted",
     "commit_records", "commit_jsonl", "inclusion_proof",
     "verify_inclusion", "verify_disclosure", "Commitment", "InclusionProof",
+    "AuditChain", "secure_audit_log",
 ]

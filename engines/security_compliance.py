@@ -130,16 +130,78 @@ class NULL_Security_Layer:
         audit_metadata = json.loads(audit_json)
         return data, audit_metadata
 
-# Integration helper
-def secure_audit_log(event: str, metadata: dict):
-    """Placeholder for SOC 2 compliant central audit logging."""
-    log_entry = {
-        "event": event,
-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "details": metadata
-    }
-    # In production, this would go to a secure WORM (Write Once Read Many) storage like S3 Object Lock or CloudWatch
-    print(f"[AUDIT] {json.dumps(log_entry)}")
+# =========================================================
+# 2. TAMPER-EVIDENT AUDIT CHAIN
+# =========================================================
+
+class AuditChain:
+    """Append-only, tamper-evident hash chain (WORM-style audit log).
+
+    Each entry commits to the previous entry's hash, so altering any past entry
+    breaks every subsequent link. The head is a single 32-byte digest that can
+    be bound into a PCC root, an AES-GCM AAD, or a Solana anchor.
+
+        entry_hash = SHA256( canon({seq, ts, event, meta, prev}) )
+    """
+
+    GENESIS = b"\x00" * 32
+
+    def __init__(self):
+        self._entries: list = []
+
+    @property
+    def head(self) -> bytes:
+        return bytes.fromhex(self._entries[-1]["hash"]) if self._entries else self.GENESIS
+
+    @property
+    def entries(self) -> list:
+        return list(self._entries)
+
+    @staticmethod
+    def _body(seq: int, ts: float, event: str, meta: dict, prev_hex: str) -> bytes:
+        return json.dumps(
+            {"seq": seq, "ts": ts, "event": event, "meta": meta, "prev": prev_hex},
+            sort_keys=True, separators=(",", ":"),
+        ).encode("utf-8")
+
+    def append(self, event: str, metadata: dict = None) -> str:
+        """Append an event; returns the new chain head (hex)."""
+        prev_hex = self.head.hex()
+        seq = len(self._entries)
+        ts = time.time()
+        meta = metadata or {}
+        h = hashlib.sha256(self._body(seq, ts, event, meta, prev_hex)).hexdigest()
+        self._entries.append(
+            {"seq": seq, "ts": ts, "event": event, "meta": meta, "prev": prev_hex, "hash": h}
+        )
+        return h
+
+    def verify(self) -> bool:
+        """True iff every link is intact and no entry has been altered."""
+        prev_hex = self.GENESIS.hex()
+        for rec in self._entries:
+            if rec["prev"] != prev_hex:
+                return False
+            body = self._body(rec["seq"], rec["ts"], rec["event"], rec["meta"], rec["prev"])
+            if hashlib.sha256(body).hexdigest() != rec["hash"]:
+                return False
+            prev_hex = rec["hash"]
+        return True
+
+
+# Process-wide default chain backing secure_audit_log().
+_DEFAULT_AUDIT_CHAIN = AuditChain()
+
+
+def secure_audit_log(event: str, metadata: dict = None) -> str:
+    """SOC 2-style central audit hook — now a real tamper-evident hash-chain
+    append (was a print-only placeholder). Returns the new chain head (hex)."""
+    return _DEFAULT_AUDIT_CHAIN.append(event, metadata or {})
+
+
+def audit_chain_head() -> bytes:
+    """Current head digest of the process default audit chain."""
+    return _DEFAULT_AUDIT_CHAIN.head
 
 if __name__ == "__main__":
     # Quick Security Demo

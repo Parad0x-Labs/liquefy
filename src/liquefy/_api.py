@@ -34,7 +34,7 @@ def _wire_engines() -> None:
 _wire_engines()
 
 from NULL_Json_Columnar_Gun_v1 import NULL_Json_Columnar_Gun_v1 as _ColGun  # type: ignore
-from security_compliance import NULL_Security_Layer  # type: ignore
+from security_compliance import NULL_Security_Layer, AuditChain, secure_audit_log  # type: ignore
 
 _ENGINE = _ColGun(level=22)
 
@@ -132,38 +132,53 @@ def search(blob: bytes, query: str) -> dict:
     }
 
 
-def compress_encrypted(data: bytes | str, key: bytes) -> bytes:
+def compress_encrypted(data: bytes | str, key: bytes, *, commitment=None,
+                       tenant_id: str = "liquefy") -> bytes:
     """
-    Compress then encrypt with AES-256-GCM.
+    Compress then encrypt with AES-256-GCM (tenant-isolated key derivation).
 
-    Only the key-holder can decompress. Used for private agent payment
-    receipt batches — parties share the key, chain sees only the ciphertext.
+    Only the key-holder can decompress. Used for private agent payment receipt
+    batches — parties share the key, the chain sees only the ciphertext.
 
     Args:
-        data: Raw JSONL bytes or str.
-        key:  32-byte AES-256 key.
+        data:       Raw JSONL bytes or str.
+        key:        Shared secret (e.g. os.urandom(32)). The AES key is derived
+                    from (key, tenant_id) via PBKDF2 with a per-blob salt.
+        commitment: Optional PCC Commitment (or 32-byte root). When supplied, the
+                    root is bound into the AES-GCM AAD, cryptographically tying
+                    the ciphertext to the column commitment.
+        tenant_id:  Multi-tenant isolation label (default "liquefy").
 
     Returns:
-        Encrypted+compressed bytes.
+        Sealed bytes — decrypt with decompress_encrypted(..., key, tenant_id=).
     """
     if isinstance(data, str):
         data = data.encode("utf-8")
     compressed = compress(data)
-    layer = NULL_Security_Layer(encryption_key=key)
-    return layer.seal(compressed)
+    metadata: dict = {}
+    if commitment is not None:
+        root = getattr(commitment, "root", commitment)
+        metadata["pcc_root"] = root.hex() if isinstance(root, (bytes, bytearray)) else str(root)
+    layer = NULL_Security_Layer(master_secret=key)
+    return layer.seal(compressed, tenant_id, metadata)
 
 
-def decompress_encrypted(blob: bytes, key: bytes) -> bytes:
+def decompress_encrypted(blob: bytes, key: bytes, *, tenant_id: str = "liquefy",
+                         return_meta: bool = False):
     """
-    Decrypt then decompress an encrypted Liquefy blob.
+    Decrypt then decompress a sealed Liquefy blob.
 
     Args:
-        blob: Encrypted+compressed bytes from compress_encrypted().
-        key:  Same 32-byte AES-256 key used to encrypt.
+        blob:        Sealed bytes from compress_encrypted().
+        key:         Same shared secret used to seal.
+        tenant_id:   Same tenant label used to seal (default "liquefy").
+        return_meta: If True, return (data, metadata); metadata carries the bound
+                     pcc_root when one was supplied. Default False returns data.
 
-    Returns:
-        Original bytes.
+    Raises:
+        PermissionError on wrong key/tenant or any tampering.
     """
-    layer = NULL_Security_Layer(encryption_key=key)
-    compressed = layer.unseal(blob)
-    return decompress(compressed)
+    layer = NULL_Security_Layer(master_secret=key)
+    compressed, metadata = layer.unseal(blob, tenant_id)
+    data = decompress(compressed)
+    return (data, metadata) if return_meta else data
