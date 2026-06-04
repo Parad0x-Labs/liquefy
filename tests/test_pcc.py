@@ -130,6 +130,43 @@ def test_zone_exact():
     assert zn["nulls"] == sum(1 for v in _values(recs, "note") if v is None)
 
 
+def test_unorderable_zone_omits_min_max_fail_closed():
+    """Mixed, non-orderable types (int + str) yield NO sound min/max.
+
+    _zone_for commits NEITHER bound key rather than inventing one. This pins the
+    fail-closed contract for any future range/bound predicate verifier: the
+    ABSENCE of "min"/"max" means "no sound bound is provable for this column" and
+    MUST be treated as UNPROVABLE (reject), never as trivially satisfied.
+
+    The attack it blocks: inject one mixed-type value, _zone_for drops min/max,
+    and a naive "no max -> nothing to violate -> pass" verifier certifies a bound
+    that does not hold. We also show the commitment layer already fails closed —
+    a committer cannot re-add a forged bound without changing the canonical zone,
+    so verify_disclosure rejects it.
+    """
+    from liquefy.pcc import _zone_for
+
+    # Unit level: a non-orderable column's zone has neither bound key.
+    zone = _zone_for([1, "a", 2])
+    assert "min" not in zone and "max" not in zone
+    assert zone["count"] == 3 and zone["nulls"] == 0
+
+    # Committed level: the same holds for the zone pinned into the Merkle leaf,
+    # and the honest (bound-less) disclosure round-trips.
+    c = commit_records([{"x": 1}, {"x": "a"}, {"x": 2}])
+    z = _zone(c, "x")
+    assert "min" not in z and "max" not in z
+    proof = inclusion_proof(c, "x")
+    assert verify_disclosure(c.root, "x", z, [1, "a", 2], proof)
+
+    # Fail-closed enforcement: forging a bound back in (claiming a max that
+    # _zone_for refused to prove) changes the canonical zone, so disclosure is
+    # rejected — the absent key cannot be silently upgraded to a satisfied bound.
+    forged = dict(z)
+    forged["max"] = 2
+    assert not verify_disclosure(c.root, "x", forged, [1, "a", 2], proof)
+
+
 def test_lying_zone_rejected():
     # Adversarial committer: bind a lying zone (max=1 over values containing 1000)
     # into a self-consistent leaf+root. The leaf/proof are internally valid, but

@@ -25,6 +25,10 @@ column and is independent of the compression codec version.
 
 `zone_json` is the EXACT zone map ({min,max,type,count,nulls}) — exact, never
 noised — so range predicates evaluated against the committed zone are sound.
+When a column is all-null or holds mutually non-orderable values, `min`/`max`
+are OMITTED, not faked: their ABSENCE means "no sound bound is provable," so a
+predicate verifier MUST fail closed (treat the bound as unprovable) and never
+read a missing `min`/`max` as satisfied. See `_zone_for` for the full invariant.
 
 Pure stdlib (hashlib + json). No third-party deps, no agent/Solana imports —
 this lives in the MIT engine.
@@ -109,7 +113,23 @@ def _node_hash(left: bytes, right: bytes) -> bytes:
 # --------------------------------------------------------------------------- #
 def _zone_for(values: list) -> dict:
     """EXACT zone map: {type, count, nulls, min, max}. min/max omitted when the
-    column is all-null or values are not mutually orderable."""
+    column is all-null or values are not mutually orderable.
+
+    SOUNDNESS INVARIANT (fail-closed bounds) — read before writing any predicate
+    verifier against the committed zone:
+
+        The PRESENCE of "min"/"max" asserts a sound, exact bound on the column.
+        Their ABSENCE asserts NOTHING: it means "no sound bound is provable for
+        this column" — NOT "the column is unbounded," NOT "every bound holds."
+
+        A range/bound predicate (e.g. "zone.max <= cap") MUST therefore FAIL
+        CLOSED when "min"/"max" is absent — treat the predicate as UNPROVABLE
+        (reject / cannot-certify), NEVER as trivially satisfied. A naive verifier
+        that reads a missing "max" as "no upper bound to violate, so pass" is
+        exploitable: an adversary injects ONE mixed-type value, _zone_for drops
+        min/max, and the bogus bound sails through. Key absence here is an
+        adversary-controllable signal — never accept it as proof of a bound.
+    """
     non_null = [v for v in values if v is not None]
     zone: dict = {
         "type": type(non_null[0]).__name__ if non_null else "null",
@@ -121,7 +141,10 @@ def _zone_for(values: list) -> dict:
             zone["min"] = min(non_null)
             zone["max"] = max(non_null)
         except TypeError:
-            # Mixed, non-orderable types — no sound min/max (mirrors codec's `except: pass`).
+            # Mixed, non-orderable types — no sound min/max exists, so we commit
+            # NEITHER key (mirrors the codec's `except: pass`). Per the soundness
+            # invariant above, downstream predicate verifiers MUST treat this
+            # absence as UNPROVABLE and fail closed, never as satisfied.
             pass
     return zone
 
