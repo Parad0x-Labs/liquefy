@@ -130,6 +130,26 @@ def test_zone_exact():
     assert zn["nulls"] == sum(1 for v in _values(recs, "note") if v is None)
 
 
+def test_lying_zone_rejected():
+    # Adversarial committer: bind a lying zone (max=1 over values containing 1000)
+    # into a self-consistent leaf+root. The leaf/proof are internally valid, but
+    # verify_disclosure must reject because the zone != canonical zone of values.
+    from liquefy.pcc import _build_layers, _zone_for, Commitment, ColumnLeaf
+
+    name, values = "amount", [5, 10, 1000]
+    lying = {"type": "int", "count": 3, "nulls": 0, "min": 0, "max": 1}
+    lf = ColumnLeaf(name=name, zone=lying, leaf=leaf_hash(name, lying, values))
+    c = Commitment(root=_build_layers([lf.leaf])[-1][0], leaves=[lf])
+    proof = inclusion_proof(c, name)
+    assert verify_inclusion(c.root, lf.leaf, proof)            # committer-consistent
+    assert not verify_disclosure(c.root, name, lying, values, proof)  # but unsound zone rejected
+    # Honest zone for the same values still verifies.
+    honest = _zone_for(values)
+    lf2 = ColumnLeaf(name=name, zone=honest, leaf=leaf_hash(name, honest, values))
+    c2 = Commitment(root=_build_layers([lf2.leaf])[-1][0], leaves=[lf2])
+    assert verify_disclosure(c2.root, name, honest, values, inclusion_proof(c2, name))
+
+
 def _run_all():
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     passed = 0

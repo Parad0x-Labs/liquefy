@@ -10,26 +10,24 @@ from pathlib import Path
 
 # Wire up engine paths — works in dev (repo clone) and installed (pip)
 def _wire_engines() -> None:
-    # Installed: engines is a top-level package alongside liquefy
-    try:
-        import engines as _e
-        _ep = Path(_e.__file__).resolve().parent
-        for _d in _ep.iterdir():
-            if _d.is_dir() and str(_d) not in sys.path:
-                sys.path.insert(0, str(_d))
-        if str(_ep) not in sys.path:
-            sys.path.insert(0, str(_ep))
-        return
-    except ImportError:
-        pass
-    # Dev / editable: engines/ at repo root (3 levels up from src/liquefy/_api.py)
-    _ep = Path(__file__).resolve().parent.parent.parent / "engines"
-    if _ep.exists():
-        for _d in _ep.iterdir():
-            if _d.is_dir() and str(_d) not in sys.path:
-                sys.path.insert(0, str(_d))
-        if str(_ep) not in sys.path:
-            sys.path.insert(0, str(_ep))
+    # Prefer the engines/ that ships with THIS package (dev/src layout: 3 levels up
+    # from src/liquefy/_api.py) so a stray editable install of liquefy elsewhere
+    # cannot shadow it via the meta-path finder. In a wheel install there is no
+    # repo-relative engines/, so fall back to importing the top-level `engines`.
+    _repo_engines = Path(__file__).resolve().parent.parent.parent / "engines"
+    if (_repo_engines / "__init__.py").exists():
+        _ep = _repo_engines
+    else:
+        try:
+            import engines as _e
+            _ep = Path(_e.__file__).resolve().parent
+        except ImportError:
+            return
+    for _d in _ep.iterdir():
+        if _d.is_dir() and str(_d) not in sys.path:
+            sys.path.insert(0, str(_d))
+    if str(_ep) not in sys.path:
+        sys.path.insert(0, str(_ep))
 
 _wire_engines()
 

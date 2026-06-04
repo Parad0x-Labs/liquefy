@@ -302,4 +302,10 @@ def verify_disclosure(
     about the other columns. Returns False on any mismatch."""
     if proof.name != name:
         return False
+    # Soundness: the zone MUST be the canonical map for these values. Without this,
+    # a malicious committer could bind a lying min/max into a self-consistent leaf,
+    # making range predicates over the "committed" zone unsound (the leaf binds
+    # whatever zone the committer chose). Recompute and compare.
+    if zone != _zone_for(values):
+        return False
     return verify_inclusion(root, leaf_hash(name, zone, values), proof)
