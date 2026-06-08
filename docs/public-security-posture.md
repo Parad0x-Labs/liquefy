@@ -2,7 +2,7 @@
 **Parad0x Labs**
 
 ## Overview
-The $NULL Sovereign SDK is engineered with a **Security-First / Identity-First** architecture. It is designed to provide 100% bit-perfect data recovery with full local isolation — engine source is MIT-licensed in `engines/`.
+The $NULL Sovereign SDK is engineered with a **Security-First / Identity-First** architecture. It is designed to provide value-lossless data recovery (SHA-256-verified record equality; textual formatting like whitespace and key-order is normalized, not guaranteed byte-identical) with full local isolation — engine source is MIT-licensed in `engines/`.
 
 ## 1. Cryptographic Envelope (The Fortress)
 All archives produced by the Liquefy engine are wrapped in a multi-layered cryptographic envelope.
@@ -22,8 +22,8 @@ The `./liquefy` wrapper enforces a strict security conduction environment:
 - **Immutability:** The container root filesystem is mounted as `--read-only`.
 - **Least Privilege:** All system capabilities are dropped (`--cap-drop=ALL`), and the process runs as a non-root system user.
 
-## 4. Bit-Perfect Identity Law
-The SDK is designed to be deterministic. A successful restoration is guaranteed to be a byte-for-byte match of the original ingest data, verifiable via SHA-256 hash comparison.
+## 4. Value-Lossless Identity Law
+The SDK is designed to be deterministic. A successful restoration recovers records equal to the original ingest data, verifiable via SHA-256 hash comparison of the recovered output. Textual formatting (whitespace, JSON key-order) is normalized, so the result is value-lossless rather than guaranteed byte-identical.
 
 ---
 © 2026 Parad0x Labs. 🛡️🚀🎖️

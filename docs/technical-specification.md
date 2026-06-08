@@ -3,7 +3,7 @@ $NULL SOVEREIGN SDK - CORPORATE TECHNICAL SPECIFICATION [v1.0]
 ================================================================================
 MISSION: Absolute Data Sovereignty + Maximum IP Protection
 ENTITY: Parad0x Labs
-STATUS: Production Verified / Enterprise Stable
+STATUS: Public Beta / Internally Validated (UNAUDITED)
 ================================================================================
 
 --- [ 1. PUBLIC INTERFACE & SECURITY POSTURE ] ---
@@ -21,14 +21,14 @@ STATUS: Production Verified / Enterprise Stable
 
 1.3 DOCUMENTATION & PROOF
     - Interface Contracts: Stable I/O definitions for automation.
-    - Verification Report: Audited 100% success rate across 23 engine paths.
-    - Proof-Pack: Hash-locked samples for local validation of Bit-Perfect Identity.
+    - Verification Report: Internal validation — 100% round-trip success across 23 engine paths (UNAUDITED; no third-party audit).
+    - Proof-Pack: Hash-locked samples for local validation of value-lossless recovery (SHA-256 record equality; formatting normalized, not guaranteed byte-identical).
 
 --- [ 2. WHAT IS SEALED (PRIVATE INTELLECTUAL PROPERTY) ] ---
 
 2.1 AUTHENTICATED ENCRYPTION (THE FORTRESS)
     - Architecture: Multi-tenant isolated cryptographic envelope.
-    - Compliance: Designed for SOC 2 and FedRAMP grade data protection.
+    - Compliance: Uses AES-256-GCM + PBKDF2-HMAC-SHA256 — primitives common to SOC 2 / FedRAMP regimes (NOT certified to any; unaudited).
     - Verification: Mandatory authenticity check performed BEFORE decryption.
 
 2.2 CONDUCTION CONTAINER (THE VALVE)
@@ -45,6 +45,6 @@ STATUS: Production Verified / Enterprise Stable
 The full engine source (compression kernels, orchestrator, codecs) is MIT licensed and available in the engines/ directory.
 
 ================================================================================
-AUDIT COMPLETE. STATUS: ENTERPRISE READY / SEALED / BIT-PERFECT.
+INTERNAL VALIDATION COMPLETE (UNAUDITED). STATUS: PUBLIC BETA / SEALED / VALUE-LOSSLESS (SHA-256-verified).
 ================================================================================
 

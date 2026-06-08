@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "liquefy"
 version = "0.2.2"
-description = "Columnar compression that beats Zstd on structured data. 226x on JSON. Built-in search. MIT."
+description = "Columnar compression that beats Zstd on structured data. Up to 226x on highly-repetitive synthetic JSON (~33-61x on real structured logs). Built-in search. MIT."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"

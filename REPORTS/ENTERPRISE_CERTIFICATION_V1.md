@@ -1,8 +1,14 @@
-# 🎖️ Liquefy Enterprise: Ultimate Certification Report
-**Comprehensive Proof-of-Work & Bit-Perfect Verification**
+# 🎖️ Liquefy: Internal Self-Test Report
+
+> **Note:** This is an **internal self-test report**, not a third-party certification or
+> audit. Liquefy is **UNAUDITED**. Recovery is **value-lossless** (SHA-256-verified record
+> equality); textual formatting (whitespace, JSON key-order) is normalized, not guaranteed
+> byte-identical.
+
+**Comprehensive Proof-of-Work & Value-Lossless Verification**
 
 **Author:** Parad0x Labs Quality Assurance Team
-**Status:** ✅ FINAL / CERTIFIED
+**Status:** Internal self-test (UNAUDITED)
 **Security:** Public Release (No IP Secrets)
 **Date:** January 4, 2026
 
@@ -10,32 +16,36 @@
 
 ## 📋 Executive Summary
 
-This report documents the rigorous "FinTech-Grade" certification of the Liquefy compression stack. Over 13 hours of systematic stress-testing across 24 engine combinations, we have verified that Liquefy achieves **100% bit-perfect restoration** while delivering industry-leading compression ratios for enterprise telemetry.
+This report documents internal "FinTech-Grade" self-testing of the Liquefy compression stack. Over 13 hours of systematic stress-testing across 24 engine combinations, we observed **value-lossless restoration** (SHA-256-verified record equality; formatting normalized, not guaranteed byte-identical) while delivering strong compression ratios for enterprise telemetry. This is an internal self-test, not an external audit.
 
 Using only the open-source engine suite and Docker decoder, we validated 58MB of production-scale logs with zero failures.
 
 ### Key Performance Indicators (KPIs)
-*   **Restoration Integrity:** 100% (Bit-for-Bit Identity)
+*   **Restoration Integrity:** 100% value-lossless (SHA-256 record equality; formatting normalized)
 *   **Average Compression Ratio:** **12.82x** (Equal to Zstd Level 22)
 *   **Peak Compression Ratio:** **17.69x** (Syslog Optimized)
-*   **Determinism:** 100% (Bit-identical across OS/Versions)
+*   **Determinism:** 100% (same input → same output across OS/Versions)
 *   **Searchability:** ✅ Native `grep` support (G-Matrix enabled)
 
 ---
 
 ## 🥇 The Golden-Rule Checklist (Must-Pass)
 
-Every run in our certification suite must pass these non-negotiable checks.
+Every run in our internal self-test suite must pass these non-negotiable checks.
 
-### 1. Bit-Perfect Identity
-*   [x] **Size Equality:** `orig_bytes == restored_bytes`
-*   [x] **SHA-256 Equality:** `sha256(orig) == sha256(restored)`
-*   [x] **BLAKE3 Equality:** Verified for high-speed skeptics.
-*   [x] **Byte-for-byte Diff:** `cmp /b` returns identical (no differences found).
+### 1. Value-Lossless Identity
+> Records are recovered value-equal and SHA-256-verified. Byte-level checks below
+> hold for these line-oriented test corpora; in general, textual formatting
+> (whitespace, JSON key-order) is normalized and not guaranteed byte-identical.
+
+*   [x] **SHA-256 Equality (recovered output):** `sha256(orig) == sha256(restored)` on the test corpora.
+*   [x] **Size Equality:** `orig_bytes == restored_bytes` on the test corpora.
+*   [x] **BLAKE3 Equality:** Cross-checked with a second hash for these corpora.
+*   [x] **Diff:** `cmp /b` returned identical (no differences) on the test corpora.
 
 ### 2. Deterministic Decode
 *   [x] **Temporal Stability:** Decode twice → identical hashes.
-*   [x] **OS Portability:** Verified bit-identical on Windows ↔ Linux (Ubuntu 24.04).
+*   [x] **OS Portability:** Same recovered output on Windows ↔ Linux (Ubuntu 24.04).
 *   [x] **Environment Agnostic:** Identical output across Python 3.10, 3.11, and 3.12.
 
 ### 3. Boundary Integrity (No Silent Truncation)
@@ -65,9 +75,9 @@ We tested Liquefy against realistic enterprise datasets. Below are the results c
 
 ---
 
-## 🛠️ Public Audit Guarantee
+## 🛠️ Public Source Transparency
 
-All tests were performed using the open-source engine suite in this repository. Engine source is MIT-licensed in `engines/`.
+All tests were performed using the open-source engine suite in this repository. Engine source is MIT-licensed in `engines/`, so anyone can independently re-run these self-tests.
 
 *   **Repository Source:** `https://github.com/Parad0x-Labs/liquefy.git`
 *   **Public Decoder:** `nullaai/liquefy-decoder-public:latest`

@@ -2,9 +2,10 @@
 """
 NULL_Security_Compliance_Layer - [NULL FORTRESS v1]
 ===================================================
-MISSION: Provide SOC 2, HIPAA, and FedRAMP compliant security features.
+MISSION: Provide a strong encryption envelope using AES-256-GCM + PBKDF2-HMAC-SHA256
+         (primitives common to SOC 2 / HIPAA / FedRAMP regimes; NOT certified to any).
 FEAT:    AES-256-GCM Encryption, HMAC-SHA256 Integrity, Multi-Tenant Isolation.
-STATUS:  Production-Grade Security.
+STATUS:  Public Beta. Unaudited — no formal security audit or compliance certification.
 """
 
 import os
@@ -50,7 +51,7 @@ class NULL_Security_Layer:
 
     def seal(self, data: bytes, tenant_id: str, metadata: dict = None) -> bytes:
         """
-        SOC 2 / FedRAMP compliant seal:
+        Authenticated seal (primitives common to SOC 2 / FedRAMP regimes; NOT certified):
         1. Multi-tenant key derivation (Isolation)
         2. AES-256-GCM authenticated encryption (Privacy + Integrity)
         3. HMAC-SHA256 signature (Authenticity)

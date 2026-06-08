@@ -82,14 +82,18 @@ def compress(data: bytes | str) -> bytes:
 
 def decompress(blob: bytes) -> bytes:
     """
-    Decompress a Liquefy-compressed blob back to the original bytes.
-    Bit-perfect: output is byte-for-byte identical to the original input.
+    Decompress a Liquefy-compressed blob back to the recovered records.
+
+    Value-lossless: the recovered records are equal to the originals and the
+    recovery is SHA-256-verified, but textual formatting (whitespace, JSON
+    key-order) is normalized — the output is not guaranteed byte-identical to
+    the original input.
 
     Args:
         blob: Compressed bytes from compress().
 
     Returns:
-        Original bytes.
+        Recovered bytes.
     """
     return _ENGINE.decompress(blob)
 

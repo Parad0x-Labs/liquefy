@@ -2,7 +2,7 @@
 
 **Think ZIP files — but the compression is 83× better, you can search inside without unzipping, and every archive has a cryptographic proof attached.**
 
-You feed it a million records. It shrinks them to almost nothing, encrypts them, and gives you a 32-byte fingerprint you can anchor on Solana forever. Any file you get back is bit-perfect — provably unchanged since the moment it was compressed.
+You feed it a million records. It shrinks them to almost nothing, encrypts them, and gives you a 32-byte fingerprint you can anchor on Solana forever. Recovery is value-lossless — every record comes back equal to the original and SHA-256-verified (textual formatting like whitespace and JSON key-order is normalized, not guaranteed byte-identical).
 
 **Columnar compression that beats Zstd on structured data. Built-in search. Built-in encryption. MIT.**
 
@@ -11,7 +11,7 @@ You feed it a million records. It shrinks them to almost nothing, encrypts them,
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 ![Codecs: 23](https://img.shields.io/badge/Codecs-23-cyan?style=flat-square)
 ![vs Zstd: +50%](https://img.shields.io/badge/vs_Zstd-+50%25_on_structured_data-00ff41?style=flat-square)
-![Restoration: Bit-Perfect](https://img.shields.io/badge/Restoration-Bit--Perfect-white?style=flat-square)
+![Restoration: Value-Lossless](https://img.shields.io/badge/Restoration-Value--Lossless_(SHA--256)-white?style=flat-square)
 
 <p align="center">
   <img src="./docs/assets/github-header-liquefy.png" alt="Parad0x Labs" width="100%" />
@@ -99,7 +99,7 @@ Or read the reports — all in the repo, all verified:
 | Document | What it proves |
 |----------|---------------|
 | [UNICORN_BENCHMARK.md](./REPORTS/UNICORN_BENCHMARK.md) | Full head-to-head vs Zstd L19 — ratio + search latency + methodology |
-| [ENTERPRISE_CERTIFICATION_V1.md](./REPORTS/ENTERPRISE_CERTIFICATION_V1.md) | Bit-perfect round-trip certification across all 23 codecs |
+| [ENTERPRISE_CERTIFICATION_V1.md](./REPORTS/ENTERPRISE_CERTIFICATION_V1.md) | Internal self-test report: value-lossless round-trip across all 23 codecs |
 | [ULTIMATE_TEST_LOGS.md](./REPORTS/ULTIMATE_TEST_LOGS.md) | Raw test output — every engine, every run |
 | [SEARCHABLE_GLACIER_PROOF.md](./REPORTS/SEARCHABLE_GLACIER_PROOF.md) | Column-skip search proof — O(k) vs O(n) |
 | [VERIFICATION_REPORT.md](./REPORTS/VERIFICATION_REPORT.md) | Independent verification of compression ratios |
@@ -141,9 +141,9 @@ Repeated values compress to a single dictionary entry. Sequential numbers compre
 
 **Search without decompressing.** Zone maps (min/max per column) let you skip entire blocks without reading the data. Point queries on timestamps or IDs touch only the relevant columns.
 
-**Encryption.** AES-256-GCM with PBKDF2 multi-tenant key derivation. Optional, zero-overhead when not used. SOC 2 / FedRAMP compliant key handling.
+**Encryption.** AES-256-GCM with PBKDF2 multi-tenant key derivation. Optional, zero-overhead when not used. Uses primitives common to SOC 2 / FedRAMP regimes (NOT certified — unaudited).
 
-**Bit-perfect restoration.** Every archive is round-trip verified. Compressed bytes decompress to the exact original bytes, every time. [Certification report](./REPORTS/ENTERPRISE_CERTIFICATION_V1.md).
+**Value-lossless restoration.** Every archive is round-trip verified. Recovered records are equal to the originals and SHA-256-verified; textual formatting (whitespace, JSON key-order) is normalized, not guaranteed byte-identical. [Internal self-test report](./REPORTS/ENTERPRISE_CERTIFICATION_V1.md).
 
 **23 format-aware codecs.** The orchestrator auto-selects the right one:
 
@@ -199,8 +199,8 @@ from liquefy import compress, decompress, search
 # Compress — 33-61× smaller on structured JSON
 blob = compress(open("agent-logs.jsonl", "rb").read())
 
-# Decompress — bit-perfect
-original = decompress(blob)
+# Decompress — value-lossless (SHA-256-verified)
+recovered = decompress(blob)
 
 # Search without full decompress — 5-61× faster than Zstd
 result = search(blob, "trace-00049999")
@@ -218,7 +218,7 @@ data_back    = decompress_encrypted(private_blob, key)
 ```bash
 liquefy compress   input.jsonl   output.null
 liquefy decompress output.null   restored.jsonl
-liquefy verify     input.jsonl                   # bit-perfect round-trip check
+liquefy verify     input.jsonl                   # value-lossless round-trip check (SHA-256)
 liquefy search     output.null   "trace-00049"
 liquefy benchmark                                # head-to-head vs Zstd
 ```
@@ -293,7 +293,7 @@ Liquefy is a structured-data compression library with properties relevant to LLM
 
 - **+50% over Zstd** on any JSON/structured data with repeated field values — LLM inference logs, agent traces, tool call records, payment receipts, telemetry.
 - **Column-level search without decompression** — efficient retrieval over compressed agent memory or audit logs.
-- **Deterministic, bit-perfect** — suitable for content-addressed storage and Merkle-tree anchoring.
+- **Deterministic, value-lossless (SHA-256-verified)** — suitable for content-addressed storage and Merkle-tree anchoring (anchor the compressed blob's hash; recovered records are value-equal, formatting normalized).
 - **AES-256-GCM** — private agent logs, encrypted receipt batches, zero plaintext on-chain.
 - **TypeScript port** for browser + Node 22 + Solana.
 - **Used in production** for Solana x402 AI agent payment settlement — [dna-x402](https://github.com/Parad0x-Labs/dna-x402).
