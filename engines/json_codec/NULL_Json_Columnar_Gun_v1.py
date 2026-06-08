@@ -411,8 +411,9 @@ class NULL_Json_Columnar_Gun_v1:
     def decompress(self, blob: bytes) -> bytes:
         if blob.startswith(PROTOCOL_ID_V3):
             return self._decompress_v3(blob)
-        if not blob.startswith(PROTOCOL_ID): return b""
-        
+        if not blob.startswith(PROTOCOL_ID):
+            raise ValueError("unrecognized or corrupt Liquefy archive (bad magic)")
+
         ptr = 4
         row_count = struct.unpack('<I', blob[ptr:ptr+4])[0]; ptr += 4
         num_cols = struct.unpack('<H', blob[ptr:ptr+2])[0]; ptr += 2
