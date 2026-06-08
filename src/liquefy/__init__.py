@@ -5,7 +5,7 @@ Quick start:
     from liquefy import compress, decompress, search
 
     blob = compress(my_jsonl_bytes)        # 33-61× smaller than raw
-    original = decompress(blob)            # bit-perfect restoration
+    recovered = decompress(blob)           # value-lossless (SHA-256-verified)
     result = search(blob, "trace-00001")   # search WITHOUT full decompress
 
 For AI agent payment receipt batching (Solana x402):

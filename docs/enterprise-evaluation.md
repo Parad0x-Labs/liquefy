@@ -4,7 +4,7 @@
 > This guide applies to the **licensed enterprise engine (Path B)**.  
 > If you only need to recover or verify existing archives without compression, use the **Public Decode-Only Appliance (Path C)** instead.
 
-This guide describes how to verify the **Zero-Persistence** and **Bit-Perfect** guarantees of the Liquefy platform using the Docker decoder appliance.
+This guide describes how to verify the **Zero-Persistence** and **value-lossless** recovery properties of the Liquefy platform using the Docker decoder appliance. Recovery is SHA-256-verified for record equality; textual formatting (whitespace, JSON key-order) is normalized, not guaranteed byte-identical.
 
 ## Prerequisites
 
@@ -42,8 +42,8 @@ docker run --rm --network=none --read-only --cap-drop=ALL \
   decompress /data/sample_archive.liq -o /data/restored.log
 ```
 
-## Step 4: Bit-Perfect Proof
-Verify the restored file against your original source hash:
+## Step 4: Value-Lossless Proof
+Verify the restored file against your original source hash (records are recovered value-equal and SHA-256-verified; formatting is normalized, not guaranteed byte-identical):
 
 ```bash
 # Compare hashes locally

@@ -1,4 +1,4 @@
-# Proof Pack — Bit-Perfect Verification
+# Proof Pack — Value-Lossless Verification (SHA-256)
 
 Reference samples and cryptographic proofs to validate the Liquefy Conduction Engine on your local machine.
 
@@ -8,7 +8,7 @@ Pinned Docker image: `nullaai/liquefy-decoder-public@sha256:b7a0499f38d192e7333c
 
 - `samples/raw/` — Original uncompressed log samples.
 - `samples/compressed/` — Production `.null` archives.
-- `samples/restored/` — Bit-perfect restorations produced by the public SDK.
+- `samples/restored/` — Value-lossless restorations produced by the public SDK (SHA-256-verified against the originals; for these line-oriented samples the recovered bytes also match exactly).
 
 ---
 
@@ -32,7 +32,7 @@ OK  proof-pack/samples/compressed/sample_nginx.null
 
 ## Full Decompression + Diff
 
-Decompress the archive, then confirm the restored file matches the original byte-for-byte:
+Decompress the archive, then confirm the restored file matches the original by SHA-256 (recovery is value-lossless; for these line-oriented samples the bytes also match exactly):
 
 ```bash
 ./liquefy decompress proof-pack/samples/compressed/sample_nginx.null proof-pack/samples/restored/sample_nginx.log
@@ -56,7 +56,7 @@ Diff against the original:
 diff proof-pack/samples/raw/sample_nginx.log proof-pack/samples/restored/sample_nginx.log
 ```
 
-Expected: no output (no output = bit-perfect match).
+Expected: no output (no output = bytes match for this sample; in general recovery is value-lossless and SHA-256-verified).
 
 ---
 
