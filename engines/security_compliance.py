@@ -33,10 +33,15 @@ class NULL_Security_Layer:
         In production, this should come from a KMS (AWS KMS, HashiCorp Vault).
         """
         if master_secret is None:
-            # Fallback for dev only - MUST be provided in production
-            self.master_secret = b"NULL_DEFAULT_SECRET_DO_NOT_USE_IN_PROD"
-        else:
-            self.master_secret = master_secret.encode() if isinstance(master_secret, str) else master_secret
+            # NEVER fall back to a constant key: a publicly-known default secret
+            # means anyone can derive the tenant keys and decrypt the data. Refuse
+            # to operate without an explicit secret instead of encrypting with a
+            # key that provides no confidentiality.
+            raise ValueError(
+                "encryption requires an explicit master secret; "
+                "refusing to use a default key"
+            )
+        self.master_secret = master_secret.encode() if isinstance(master_secret, str) else master_secret
 
     def _derive_tenant_key(self, tenant_id: str, salt: bytes) -> bytes:
         """KDF to ensure multi-tenant cryptographic isolation."""

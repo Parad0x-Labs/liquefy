@@ -35,10 +35,14 @@ class NULL_Orchestrator:
             
         self.safety_enabled = safety_enabled
         Valve.enabled = safety_enabled
-        
-        # Security Layer
-        self.security = NULL_Security_Layer(master_secret=security_secret)
-        
+
+        # Security Layer — constructed lazily so the orchestrator can be created
+        # without a secret (e.g. to inspect engines). The encrypting compress/
+        # decompress paths call _require_security(), which raises if no explicit
+        # secret was provided rather than falling back to a public default key.
+        self._security_secret = security_secret
+        self._security = None
+
         # Engine registry: key -> (module_name, class_name, protocol_id)
         # IMPORTANT: every protocol_id must be unique — duplicate IDs cause wrong
         # champion selection during decompress (last-write wins in registry dict).
@@ -76,6 +80,16 @@ class NULL_Orchestrator:
             'universal_rep':     ('NULL_Universal_Repetition_Focused',   'NULL_Universal_Repetition_Focused',   b'UNV2'),
         }
         self.registry = {}  # protocol_id -> decompress_func
+
+    def _require_security(self) -> "NULL_Security_Layer":
+        """Lazily build the security layer for the encrypting paths.
+
+        Raises ValueError (from NULL_Security_Layer) if no explicit secret was
+        provided — we never silently encrypt with a public default key.
+        """
+        if self._security is None:
+            self._security = NULL_Security_Layer(master_secret=self._security_secret)
+        return self._security
 
     # ── Format auto-detection ────────────────────────────────────────────────
 
@@ -161,7 +175,7 @@ class NULL_Orchestrator:
         compressed_blob = Valve.seal(data, engine.compress, engine.decompress, proto_id[:4].ljust(4, b'\x00'))
 
         # 2. Encrypt + Isolate (Security Layer)
-        secure_blob = self.security.seal(compressed_blob, tenant_id, {
+        secure_blob = self._require_security().seal(compressed_blob, tenant_id, {
             "engine": engine_key,
             "original_size": len(data),
             "safety": self.safety_enabled
@@ -184,7 +198,7 @@ class NULL_Orchestrator:
         start_time = time.time()
 
         # 1. Auth & Decrypt
-        compressed_blob, audit_meta = self.security.unseal(secure_blob, tenant_id)
+        compressed_blob, audit_meta = self._require_security().unseal(secure_blob, tenant_id)
 
         # 2. Decompress
         if not self.registry:

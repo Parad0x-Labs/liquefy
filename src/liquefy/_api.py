@@ -94,6 +94,11 @@ def decompress(blob: bytes) -> bytes:
 
     Returns:
         Recovered bytes.
+
+    Raises:
+        ValueError: if the blob is not a recognized Liquefy archive (bad magic
+            / corrupt / truncated). The error propagates to the caller — we
+            never silently return empty bytes on a bad archive.
     """
     return _ENGINE.decompress(blob)
 

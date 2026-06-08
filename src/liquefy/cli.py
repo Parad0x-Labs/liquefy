@@ -45,7 +45,17 @@ def main():
 
     elif args.cmd == "decompress":
         blob = args.input.read_bytes()
-        data = decompress(blob)
+        try:
+            data = decompress(blob)
+        except ValueError as e:
+            print(f"✗  cannot decompress {args.input.name}: {e}", file=sys.stderr)
+            sys.exit(1)
+        # Defense in depth: a non-empty archive that decodes to nothing is a
+        # failure, not a success — never print a green "restored 0.00MB".
+        if not data and blob:
+            print(f"✗  cannot decompress {args.input.name}: archive decoded to empty output",
+                  file=sys.stderr)
+            sys.exit(1)
         args.output.write_bytes(data)
         print(f"✓  restored {len(data)/1e6:.2f}MB → {args.output}")
 
@@ -67,7 +77,7 @@ def main():
             sys.exit(1)
 
     elif args.cmd == "benchmark":
-        import subprocess, sys
+        import subprocess
         root = Path(__file__).resolve().parent.parent.parent
         subprocess.run([sys.executable, str(root / "tools" / "benchmark.py"),
                        "--lines", str(args.lines)], check=True)
