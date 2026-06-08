@@ -32,11 +32,11 @@ dependencies = [
 [project.optional-dependencies]
 fast = [
   "orjson>=3.9.0",
-  "numpy>=1.24.0",
+  "numpy>=2.0.2",
 ]
 bench = [
   "orjson>=3.9.0",
-  "numpy>=1.24.0",
+  "numpy>=2.0.2",
   "lz4>=4.0.0",
   "brotli>=1.0.9",
 ]
