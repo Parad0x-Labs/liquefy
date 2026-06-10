@@ -1,6 +1,6 @@
 zstandard>=0.21.0
 xxhash>=3.0.0
-cryptography>=41.0.0
+cryptography>=48.0.1
 lz4>=4.4.5
 brotli>=1.0.9
 orjson>=3.11.5
