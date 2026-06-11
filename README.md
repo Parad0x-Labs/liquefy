@@ -148,6 +148,8 @@ Repeated values compress to a single dictionary entry. Sequential numbers compre
 
 **Value-lossless restoration.** Every archive is round-trip verified. Recovered records are equal to the originals and SHA-256-verified; textual formatting (whitespace, JSON key-order) is normalized, not guaranteed byte-identical. [Internal self-test report](./REPORTS/ENTERPRISE_CERTIFICATION_V1.md).
 
+**Per-Column Commitment (PCC).** Pin every column of an archive under one 32-byte Merkle root, then disclose and prove a *single* column — its values and exact zone map — without revealing the rest. The verifier recomputes the leaf and checks it against the root; a tampered value or a lying zone is rejected. Pure stdlib, no Solana or agent deps, covered by `tests/test_pcc.py` (10 tests). This is the verifiable-evidence keystone OpenClaw builds on: `from liquefy import commit_records, inclusion_proof, verify_disclosure`.
+
 **23 format-aware codecs.** The orchestrator auto-selects the right one:
 
 | Category | Codecs |
